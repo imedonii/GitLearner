@@ -1,0 +1,1 @@
+export { BecomeMaster } from './BecomeMaster'

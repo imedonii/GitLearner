@@ -1,0 +1,7 @@
+/* Apply monospace to code and terminal elements */
+code,
+pre,
+.font-mono {
+  font-family: var(--font-mono), 'Courier New', monospace !important;
+  font-feature-settings: 'calt' 0;
+}
