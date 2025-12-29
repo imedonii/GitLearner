@@ -10,7 +10,7 @@ export const HeroSection = () => {
   }
 
   return (
-    <div className="container mx-auto px-6 py-30">
+    <section className="container mx-auto px-6 py-30">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -55,6 +55,6 @@ export const HeroSection = () => {
           </Button>
         </motion.div>
       </motion.div>
-    </div>
+    </section>
   )
 }
