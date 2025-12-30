@@ -89,6 +89,8 @@ export const EmailVerification = () => {
       //   onVerify(verificationCode)
       setLoading(false)
     }, 1500)
+
+    router.push('/auth/levels')
   }
 
   const handleResend = async () => {
