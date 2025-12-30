@@ -1,5 +1,4 @@
-import { ForgetPassword } from '@/components/Auth'
-
+import { EmailVerification } from '@/components/Auth'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -34,8 +33,8 @@ export const metadata: Metadata = {
   },
 }
 
-const ForgetPasswordPage = () => {
-  return <ForgetPassword />
+const EmailVerificationPage = () => {
+  return <EmailVerification />
 }
 
-export default ForgetPassword
+export default EmailVerificationPage

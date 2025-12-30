@@ -60,6 +60,8 @@ export const SignUp = () => {
       return
     }
 
+    router.push('/auth/email-verification')
+
     // Simulate API call
     // setTimeout(() => {
     //   onSignup(name, email, password)
@@ -232,7 +234,7 @@ export const SignUp = () => {
           <p className="text-center text-sm text-slate-400 mt-6">
             Already have an account?{' '}
             <button
-              onClick={() => router.push('/signin')}
+              onClick={() => router.push('/auth/signin')}
               className="text-emerald-400 hover:text-emerald-300 font-medium transition-colors"
             >
               Sign in
