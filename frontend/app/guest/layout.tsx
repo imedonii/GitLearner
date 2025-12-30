@@ -14,7 +14,7 @@ export default function GuestLayout({ children }: { children: ReactNode }) {
   return (
     <div>
       {/* Navbar */}
-      <Navbar onSignIn={onSignIn} onSignUp={onSignUp} />
+      <Navbar />
 
       {/* Main content */}
       <main>{children}</main>
