@@ -21,4 +21,7 @@ async function main() {
 
 main()
   .catch(console.error)
-  .finally(async () => await prisma.$disconnect());
+  .finally(async () => {
+    await prisma.$disconnect();
+    await pool.end();
+  });
