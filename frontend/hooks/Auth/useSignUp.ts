@@ -3,7 +3,7 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
 import { QUERY_KEY } from '../queryKeys'
 import { axiosInstance } from '@/api'
 
@@ -17,7 +17,7 @@ type useSignUpProps = UseMutateFunction<
   registrationResponse,
   unknown,
   {
-    fullname: string
+    fullName: string
     email: string
     password: string
   },
@@ -25,7 +25,7 @@ type useSignUpProps = UseMutateFunction<
 >
 
 async function signUp(payload: {
-  fullname: string
+  fullName: string
   email: string
   password: string
 }): Promise<registrationResponse> {
@@ -40,7 +40,7 @@ export function useSignUp(): {
   error: Error | null
 } {
   const queryClient = useQueryClient()
-  const navigate = useNavigate()
+  const router = useRouter()
 
   const {
     mutate: signUpMutation,
@@ -50,7 +50,7 @@ export function useSignUp(): {
     registrationResponse,
     Error,
     {
-      fullname: string
+      fullName: string
       email: string
       password: string
     },
@@ -60,7 +60,7 @@ export function useSignUp(): {
     onSuccess: (data, variables) => {
       localStorage.setItem('pending_verify_email', variables.email)
       queryClient.removeQueries({ queryKey: [QUERY_KEY.user] })
-      navigate('/auth/email-verification')
+      router.push('/auth/email-verification')
     },
     onError: () => {
       error

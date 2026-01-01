@@ -11,7 +11,8 @@ import {
   Loader2,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSignUp } from '@/hooks/Auth/useSignUp'
 
 export const SignUp = () => {
   const [name, setName] = useState('')
@@ -19,8 +20,8 @@ export const SignUp = () => {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const { signUpMutation, isPending, error: signUpError } = useSignUp()
 
   const passwordStrength = (password: string) => {
     if (password.length < 6) return { strength: 'weak', color: 'red' }
@@ -30,40 +31,39 @@ export const SignUp = () => {
 
   const strength = passwordStrength(password)
 
+  useEffect(() => {
+    if (signUpError) {
+      setError(signUpError.message || 'An error occurred during sign up')
+    }
+  }, [signUpError])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    setLoading(true)
 
     // Validate inputs
     if (!name || !email || !password || !confirmPassword) {
       setError('Please fill in all fields')
-      setLoading(false)
       return
     }
 
     if (!email.includes('@')) {
       setError('Please enter a valid email')
-      setLoading(false)
       return
     }
 
     if (password.length < 6) {
       setError('Password must be at least 6 characters')
-      setLoading(false)
       return
     }
 
     if (password !== confirmPassword) {
       setError('Passwords do not match')
-      setLoading(false)
       return
     }
 
-    router.push('/auth/email-verification')
-
-    // Simulate API call
-    // setTimeout(() => {
+    // Call the sign up mutation
+    signUpMutation({ fullName: name, email, password })
     //   onSignup(name, email, password)
     //   setLoading(false)
     // }, 1000)
@@ -216,10 +216,10 @@ export const SignUp = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={isPending}
               className="w-full py-3 bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 disabled:from-slate-700 disabled:to-slate-700 text-white font-semibold rounded-lg transition-all flex items-center justify-center gap-2 mt-6"
             >
-              {loading ? (
+              {isPending ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
                   Creating account...
@@ -228,6 +228,12 @@ export const SignUp = () => {
                 'Create Account'
               )}
             </button>
+            {error && (
+              <div className="flex items-center gap-2 p-3 text-sm font-medium text-red-600 bg-red-100 rounded-lg">
+                <AlertCircle className="w-5 h-5" />
+                <span>{error}</span>
+              </div>
+            )}
           </form>
 
           {/* Sign In Link */}

@@ -4,7 +4,7 @@ import { axiosInstance } from '@/api'
 
 export interface User {
   id: number
-  fullname: string
+  fullName: string
   email: string
   level: number
   token: string
