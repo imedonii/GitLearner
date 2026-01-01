@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "frontend": "cd frontend && npm run dev",
+    "backend": "cd backend && npm run start:dev",
+    "prisma": "cd backend && npx prisma studio",
+    "dev": "npm run backend & npm run frontend & npm run prisma"
+  }
+}
