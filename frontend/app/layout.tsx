@@ -2,9 +2,7 @@
 
 import { Fira_Code } from 'next/font/google'
 import './globals.css'
-import Script from 'next/script'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useState } from 'react'
 
 const firaCode = Fira_Code({
@@ -25,7 +23,6 @@ export default function RootLayout({
       <body>
         <QueryClientProvider client={queryClient}>
           {children}
-          <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       </body>
     </html>
