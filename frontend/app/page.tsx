@@ -4,17 +4,54 @@ import GuestLayout from './guest/layout'
 import GuestPage from './guest/page'
 
 export const metadata: Metadata = {
-  title: 'Git Learner - Learn Git Interactively',
-  description:
-    'Master Git with interactive visual tutorials, terminal simulations, and hands-on exercises.',
-  openGraph: {
-    title: 'Git Learner - Learn Git Interactively',
-    description:
-      'Master Git with interactive visual tutorials, terminal simulations, and hands-on exercises.',
-    images: ['https://gitlearner.com/logo.svg'],
+  metadataBase: new URL('https://gitlearner.com'),
+  title: {
+    default: 'Git Learner - Interactive Git Learning',
+    template: '%s | Git Learner',
   },
-  alternates: {
-    canonical: 'https://gitlearner.com',
+  description:
+    'Learn Git interactively with visualizations, playgrounds, and real-world examples.',
+  keywords: [
+    'Git Learner',
+    'Git tutorial',
+    'Git for beginners',
+    'Git interactive',
+    'Version control',
+    'Git playground',
+  ],
+  authors: [{ name: 'Git Learner' }],
+  creator: 'Git Learner',
+  openGraph: {
+    title: 'Git Learner - Interactive Git Learning',
+    description:
+      'Master Git through interactive visualization and hands-on practice.',
+    url: 'https://gitlearner.com',
+    siteName: 'Git Learner',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Git Learner - Interactive Git Learning',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Git Learner - Interactive Git Learning',
+    description: 'Learn Git with interactive lessons and real Git simulations.',
+    images: ['/og-image.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  icons: {
+    icon: '/logo.ico',
+    shortcut: '/logo.ico',
+    apple: '/logo.ico',
   },
 }
 
