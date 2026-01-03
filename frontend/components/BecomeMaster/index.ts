@@ -1,1 +1,0 @@
-export { BecomeMaster } from './BecomeMaster'

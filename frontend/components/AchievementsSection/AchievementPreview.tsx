@@ -1,10 +1,12 @@
-type BenefitItemProps = {
+export const AchievementPreview = ({
+  icon,
+  title,
+  description,
+}: {
   icon: React.ReactNode
   title: string
   description: string
-}
-
-export const BenefitItem = ({ icon, title, description }: BenefitItemProps) => {
+}) => {
   return (
     <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6 hover:border-emerald-500/30 transition-colors">
       <div className="mb-4">{icon}</div>

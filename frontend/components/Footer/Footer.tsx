@@ -1,3 +1,5 @@
+// since 2025
+
 const Footer = () => {
   return (
     <footer className="py-8 text-center text-slate-400 border-t border-slate-800 bg-slate-900 mt-10">

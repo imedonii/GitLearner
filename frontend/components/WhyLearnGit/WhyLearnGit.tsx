@@ -1,38 +1,50 @@
 'use client'
 import { motion } from 'framer-motion'
-import { CheckCircle2 } from 'lucide-react'
+import { Code2, GitBranch, Star, Users } from 'lucide-react'
 import { BenefitItem } from './BenefitItem'
 
 export const WhyLearnGit = () => {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 1.2, duration: 0.6 }}
-      className="mt-24 max-w-4xl mx-auto"
-    >
-      <h2 className="text-3xl font-bold text-center mb-12 bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent">
-        Why Learn Git?
-      </h2>
+    <section className="py-20 border-t border-slate-800">
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+        className="max-w-6xl mx-auto"
+      >
+        <div className="text-center mb-12">
+          <h2 className="text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent">
+            Why Learn Git?
+          </h2>
+          <p className="text-xl text-slate-300">
+            Master the essential tool for modern software development
+          </p>
+        </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <BenefitItem
-          icon={<CheckCircle2 className="w-6 h-6 text-emerald-400" />}
-          text="Industry-standard version control used by millions of developers"
-        />
-        <BenefitItem
-          icon={<CheckCircle2 className="w-6 h-6 text-emerald-400" />}
-          text="Essential skill for collaborating on team projects"
-        />
-        <BenefitItem
-          icon={<CheckCircle2 className="w-6 h-6 text-emerald-400" />}
-          text="Track changes, experiment safely, and never lose your work"
-        />
-        <BenefitItem
-          icon={<CheckCircle2 className="w-6 h-6 text-emerald-400" />}
-          text="Required knowledge for open-source contributions"
-        />
-      </div>
-    </motion.div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <BenefitItem
+            icon={<Code2 className="w-10 h-10 text-emerald-400" />}
+            title="Version Control Fundamentals"
+            description="Track every change, never lose work, and experiment safely"
+          />
+          <BenefitItem
+            icon={<Users className="w-10 h-10 text-blue-400" />}
+            title="Team Collaboration"
+            description="Work seamlessly with teams on shared codebases"
+          />
+          <BenefitItem
+            icon={<Star className="w-10 h-10 text-purple-400" />}
+            title="Industry Standard"
+            description="Used by millions of developers worldwide"
+          />
+          <BenefitItem
+            icon={<GitBranch className="w-10 h-10 text-pink-400" />}
+            title="GitHub & GitLab"
+            description="Essential for open-source and portfolio projects"
+          />
+        </div>
+      </motion.div>
+    </section>
   )
 }
