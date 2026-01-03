@@ -1,5 +1,7 @@
+import { LearningPath } from '@/components/LearningPath/LearningPath'
+
 const LearningPathPage = () => {
-  return <div>Learning Path Page</div>
+  return <LearningPath />
 }
 
 export default LearningPathPage

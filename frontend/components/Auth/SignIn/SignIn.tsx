@@ -55,9 +55,9 @@ export const SignIn = () => {
           >
             <GitBranch className="w-8 h-8 text-white" />
           </motion.div>
-          <h1 className="text-3xl font-bold text-white mb-2">Learn Git</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">Git Learner</h1>
           <p className="text-slate-400">
-            Master version control, one commit at a time
+            Master Git version control, one commit at a time
           </p>
         </div>
 

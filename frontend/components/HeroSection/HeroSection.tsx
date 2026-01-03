@@ -1,12 +1,18 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { GitBranch, Play } from 'lucide-react'
+import { GitBranch, Play, Terminal } from 'lucide-react'
 import { Button } from '@/components/UI/button'
+import { useRouter } from 'next/navigation'
 
 export const HeroSection = () => {
+  const router = useRouter()
   const onStart = () => {
-    // Handle start learning action
+    router.push('/learning-path')
+  }
+
+  const onPlayground = () => {
+    router.push('/playground')
   }
 
   return (
@@ -45,14 +51,25 @@ export const HeroSection = () => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.5, duration: 0.5 }}
         >
-          <Button
-            onClick={onStart}
-            size="lg"
-            className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-6 text-lg gap-2"
-          >
-            <Play className="w-5 h-5" />
-            Start Learning
-          </Button>
+          <div className="flex gap-4 justify-center">
+            <Button
+              onClick={onStart}
+              size="lg"
+              className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-6 text-lg gap-2"
+            >
+              <Play className="w-5 h-5" />
+              Start Learning
+            </Button>
+
+            <Button
+              onClick={onPlayground}
+              size="lg"
+              className="bg-transparent border border-emerald-600 text-emerald-400 hover:text-emerald-100 px-8 py-6 text-lg gap-2 transition-colors duration-200 hover:border-emerald-500 hover:bg-transparent"
+            >
+              <Terminal className="w-5 h-5" />
+              Playground
+            </Button>
+          </div>
         </motion.div>
       </motion.div>
     </section>
