@@ -1,32 +1,42 @@
-// middleware.js (root of project)
-import { NextResponse } from 'next/server';
-import { verifyAuth } from './lib';
+// middleware.ts
+import { NextResponse } from 'next/server'
+import { verifyAuth } from './lib'
 
 export async function middleware(request) {
-    // Get the pathname of the request
-    const path = request.nextUrl.pathname;
+    const path = request.nextUrl.pathname
+    const token = request.cookies.get('token')?.value
+    const isAuthenticated = token ? await verifyAuth(token) : false
 
-    // Define public paths that don't require authentication
-    const publicPaths = ['/', '/auth/signin', '/auth/signup',];
-    const isPublicPath = publicPaths.some(publicPath => path === publicPath || path.startsWith(publicPath + '/'));
+    const authPages = ['/auth/signin', '/auth/signup']
+    const isAuthPage = authPages.some(p => path.startsWith(p))
 
+    const publicPaths = ['/', ...authPages]
+    const isPublicPath = publicPaths.some(
+        p => path === p || path.startsWith(p + '/')
+    )
+
+    // 🔁 Logged in users should NOT see auth pages
+    if (isAuthenticated && isAuthPage) {
+        return NextResponse.redirect(
+            new URL('/learning-path', request.url)
+        )
+    }
+
+    // 🔓 Allow public paths
     if (isPublicPath) {
-        return NextResponse.next();
+        return NextResponse.next()
     }
 
-    // Check if the user is authenticated
-    const token = request.cookies.get('authToken')?.value;
-    const isAuthenticated = token && await verifyAuth(token);
-
-    // If not authenticated and trying to access protected route, redirect to login
+    // 🔒 Protect everything else
     if (!isAuthenticated) {
-        return NextResponse.redirect(new URL(`/auth/signin`, request.url));
+        return NextResponse.redirect(
+            new URL('/auth/signin', request.url)
+        )
     }
 
-    return NextResponse.next();
+    return NextResponse.next()
 }
 
-// Configure which paths the middleware runs on
 export const config = {
     matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
-};
+}

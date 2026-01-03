@@ -46,13 +46,14 @@
 // export const axiosInstance = axios
 
 import axios from 'axios'
-import { ResponseError } from '../app/Errors/ResponseError'
+import { ResponseError } from '../utils/Errors/ResponseError'
 
 export const axiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 })
 
 axiosInstance.interceptors.request.use((config) => {
