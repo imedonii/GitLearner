@@ -31,7 +31,7 @@ export const HeroSection = () => {
         >
           <GitBranch className="w-16 h-16 text-emerald-400" />
           <h1 className="text-6xl font-bold bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent">
-            Learn Git
+            Learn Git Interactively
           </h1>
         </motion.div>
 
