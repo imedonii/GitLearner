@@ -7,7 +7,7 @@ export async function middleware(request) {
     const token = request.cookies.get('token')?.value
     const isAuthenticated = token ? await verifyAuth(token) : false
 
-    const authPages = ['/auth/signin', '/auth/signup']
+    const authPages = ['/auth/signin', '/auth/signup', '/playground', '/cheatsheet']
     const isAuthPage = authPages.some(p => path.startsWith(p))
 
     const publicPaths = ['/', ...authPages]

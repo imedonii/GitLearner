@@ -142,6 +142,22 @@ Git Commands:
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
+      <div
+        className="flex items-center justify-center gap-4 p-4 cursor-pointer"
+        onClick={() => router.push('/')}
+      >
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+          className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-blue-500"
+        >
+          <GitBranch className="w-6 h-6 text-white" />
+        </motion.div>
+
+        <h1 className="text-xl font-bold text-white">Git Learner</h1>
+      </div>
+
       {/* Header */}
       <div className="bg-slate-900/50 border-b border-slate-700 p-4 sticky top-0 z-10">
         <div className="container mx-auto flex items-center justify-between">
@@ -155,19 +171,6 @@ Git Commands:
                 </p>
               </div>
             </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-              className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-blue-500"
-            >
-              <GitBranch className="w-6 h-6 text-white" />
-            </motion.div>
-
-            <h1 className="text-xl font-bold text-white">Git Learner</h1>
           </div>
 
           <div className="flex items-center gap-2">

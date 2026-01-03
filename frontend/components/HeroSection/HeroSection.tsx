@@ -55,7 +55,7 @@ export const HeroSection = () => {
             <Button
               onClick={onStart}
               size="lg"
-              className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-6 text-lg gap-2"
+              className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-6 text-lg gap-2 cursor-pointer"
             >
               <Play className="w-5 h-5" />
               Start Learning
@@ -64,7 +64,7 @@ export const HeroSection = () => {
             <Button
               onClick={onPlayground}
               size="lg"
-              className="bg-transparent border border-emerald-600 text-emerald-400 hover:text-emerald-100 px-8 py-6 text-lg gap-2 transition-colors duration-200 hover:border-emerald-500 hover:bg-transparent"
+              className="bg-transparent border border-emerald-600 text-emerald-400 hover:text-emerald-100 px-8 py-6 text-lg gap-2 transition-colors duration-200 hover:border-emerald-500 hover:bg-transparent cursor-pointer"
             >
               <Terminal className="w-5 h-5" />
               Playground
