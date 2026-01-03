@@ -44,7 +44,7 @@ export const CTASection = () => {
             <Button
               onClick={onNavigateToPlayground}
               size="lg"
-              className="border border-emerald-500 text-white bg-transparent hover:bg-slate-800 px-10 py-6 text-lg gap-2"
+              className="bg-transparent border border-emerald-600 text-emerald-400 hover:text-emerald-100 px-8 py-6 text-lg gap-2 transition-colors duration-200 hover:border-emerald-500 hover:bg-transparent cursor-pointer"
             >
               <Terminal className="w-5 h-5" />
               Try Playground
