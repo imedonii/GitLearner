@@ -33,23 +33,23 @@ export class UsersController {
   // READ ONE
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(Number(id));
+    return this.usersService.findOne(id);
   }
 
   // UPDATE
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
-    return this.usersService.update(Number(id), dto);
+    return this.usersService.update(id, dto);
   }
 
   // DELETE
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.usersService.remove(Number(id));
+    return this.usersService.remove(id);
   }
 
   @Get('me')
   getMe(@Param('id') id: string) {
-    return this.usersService.findOne(Number(id));
+    return this.usersService.findOne(id);
   }
 }

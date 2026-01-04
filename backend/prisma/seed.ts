@@ -13,7 +13,11 @@ const prisma = new PrismaClient({
 
 async function main() {
   await prisma.level.createMany({
-    data: [{ name: 'New here' }, { name: 'I know things' }, { name: 'Pro' }],
+    data: [
+      { name: 'New here', slug: 'new_here' },
+      { name: 'I know things', slug: 'i_know_things' },
+      { name: 'Pro', slug: 'pro_level' },
+    ],
     skipDuplicates: true,
   });
   console.log('✅ Seeded levels!');
