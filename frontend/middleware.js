@@ -1,25 +1,19 @@
 // middleware.ts
 import { NextResponse } from 'next/server'
-import { verifyAuth } from './lib'
 
-export async function middleware(request) {
+export function middleware(request) {
     const path = request.nextUrl.pathname
     const token = request.cookies.get('token')?.value
-    const isAuthenticated = token ? await verifyAuth(token) : false
 
     const authPages = ['/auth/signin', '/auth/signup', '/playground', '/cheatsheet']
     const isAuthPage = authPages.some(p => path.startsWith(p))
 
     const publicPaths = ['/', ...authPages]
-    const isPublicPath = publicPaths.some(
-        p => path === p || path.startsWith(p + '/')
-    )
+    const isPublicPath = publicPaths.some(p => path === p || path.startsWith(p + '/'))
 
     // 🔁 Logged in users should NOT see auth pages
-    if (isAuthenticated && isAuthPage) {
-        return NextResponse.redirect(
-            new URL('/learning-path', request.url)
-        )
+    if (token && isAuthPage) {
+        return NextResponse.redirect(new URL('/learning-path', request.url))
     }
 
     // 🔓 Allow public paths
@@ -28,10 +22,8 @@ export async function middleware(request) {
     }
 
     // 🔒 Protect everything else
-    if (!isAuthenticated) {
-        return NextResponse.redirect(
-            new URL('/auth/signin', request.url)
-        )
+    if (!token) {
+        return NextResponse.redirect(new URL('/auth/signin', request.url))
     }
 
     return NextResponse.next()
