@@ -7,12 +7,13 @@ datasource db {
 }
 
 model Level {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   name      String
-  slug      String   @unique
+  slug      String    @unique
   users     User[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  leasons   Leasons[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model User {
@@ -24,4 +25,19 @@ model User {
   level     Level?   @relation(fields: [levelId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Leasons {
+  id             String   @id @default(uuid())
+  slug           String   @unique
+  title          String
+  description    String
+  explanation    String
+  exampleCommand String
+  hint           String
+  objective      String
+  levelId        String
+  level          Level    @relation(fields: [levelId], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
