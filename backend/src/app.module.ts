@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { LeasonsModule } from './leasons/leasons.module';
 import { LevelsModule } from './levels/levels.module';
+import { UserLessonProgressModule } from './user-lesson-progress/user-lesson-progress.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { LevelsModule } from './levels/levels.module';
     AuthModule,
     LeasonsModule,
     LevelsModule,
+    UserLessonProgressModule,
   ],
   controllers: [AppController],
   providers: [AppService],
