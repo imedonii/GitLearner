@@ -39,7 +39,6 @@ export function useUser(): useUserProps {
     refetchOnMount: 'always',
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
-    staleTime: 0,
     enabled: !!localStorage.getItem('token'),
   })
 
