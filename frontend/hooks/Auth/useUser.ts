@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { QUERY_KEY } from '../queryKeys'
 import { axiosInstance } from '@/api'
+import Cookies from 'js-cookie'
 
 export interface User {
   id: number
@@ -16,7 +17,7 @@ interface useUserProps {
 }
 
 async function getUser(): Promise<User | null> {
-  const token = localStorage.getItem('token')
+  const token = Cookies.get('token')
 
   try {
     const response = await axiosInstance.get('me', {
@@ -27,7 +28,7 @@ async function getUser(): Promise<User | null> {
 
     return response.data
   } catch (error) {
-    localStorage.removeItem('token')
+    Cookies.remove('token')
     throw error
   }
 }
@@ -39,7 +40,7 @@ export function useUser(): useUserProps {
     refetchOnMount: 'always',
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
-    enabled: !!localStorage.getItem('token'),
+    enabled: !!Cookies.get('token'),
   })
 
   return {
