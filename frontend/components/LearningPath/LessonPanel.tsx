@@ -10,7 +10,7 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import { Button } from '@/components/UI'
-import { useLessons, Lesson as ApiLesson } from '@/hooks/Lessons/useLessons'
+import { Lesson as ApiLesson } from '@/hooks/Lessons/useLessons'
 import { useState, useEffect } from 'react'
 
 // Extend API lesson type with optional UI-only fields
@@ -26,6 +26,10 @@ interface LessonPanelProps {
   onComplete?: () => void
   showCompleteButton?: boolean
   className?: string
+  isLoading: boolean
+  isError: boolean
+  updateLesson: (id: string, data: Partial<ApiLesson>) => Promise<ApiLesson>
+  isUpdating: boolean
 }
 
 export default function LessonPanel({
@@ -34,26 +38,20 @@ export default function LessonPanel({
   onComplete,
   showCompleteButton = false,
   className = '',
+  isLoading,
+  isError: error,
+  updateLesson,
+  isUpdating,
 }: LessonPanelProps) {
-  const {
-    lesson: fetchedLesson,
-    isLoading,
-    error,
-    updateLesson,
-    isUpdating,
-  } = useLessons(lessonId)
-
   const [lesson, setLesson] = useState<Lesson | null>(initialLesson || null)
   const [isCompleting, setIsCompleting] = useState(false)
 
   // Update lesson when fetchedLesson changes or when initialLesson changes
   useEffect(() => {
-    if (fetchedLesson) {
-      setLesson(fetchedLesson)
-    } else if (initialLesson) {
+    if (initialLesson) {
       setLesson(initialLesson)
     }
-  }, [fetchedLesson, initialLesson])
+  }, [initialLesson])
 
   const handleComplete = async () => {
     if (!lesson || !onComplete) return
@@ -90,7 +88,7 @@ export default function LessonPanel({
       >
         <div className="flex items-center gap-3 text-red-400">
           <AlertCircle className="w-5 h-5" />
-          <span>Error loading lesson: {error.message}</span>
+          <span>Error loading lesson: {error}</span>
         </div>
       </div>
     )

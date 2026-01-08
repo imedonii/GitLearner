@@ -18,7 +18,6 @@ import { useState } from 'react'
 import HelpDialog from './HelpDialog'
 import { KnowledgeLevel } from './KnowledgeLevelPage'
 import { LessonLevel } from '@/utils/lessons'
-import { useLessons } from '@/hooks/Lessons/useLessons'
 
 export interface LessonItem {
   id: string
@@ -58,14 +57,6 @@ export default function Sidebar({
   onCheatSheet,
   userLevel,
 }: SidebarProps) {
-  const {
-    lesson: fetchedLesson,
-    isLoading,
-    error,
-    updateLesson,
-    isUpdating,
-  } = useLessons()
-  console.log(fetchedLesson)
   const [showHelp, setShowHelp] = useState(false)
   const [expandedLevels, setExpandedLevels] = useState<Set<LessonLevel>>(
     new Set(['beginner', 'mid', 'pro'])

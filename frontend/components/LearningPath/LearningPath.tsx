@@ -23,7 +23,7 @@ import { useRouter } from 'next/navigation'
 export const LearningPath = () => {
   const { user } = useUser()
   const router = useRouter()
-  const { lessons, isLoading, isError } = useLessons()
+  const { lessons, isLoading, isError, updateLesson, isUpdating } = useLessons()
   const [currentLessonId, setCurrentLessonId] = useState<string | null>(null)
   const [gitState, setGitState] = useState<GitState>(initialGitState)
   const [showPushAnimation, setShowPushAnimation] = useState(false)
@@ -73,13 +73,6 @@ export const LearningPath = () => {
     }
   }, [lessons, currentLessonId])
 
-  // Debug/logging effect (kept as hook, no returns)
-  useEffect(() => {
-    if (lessons) {
-      console.log('Lessons loaded:', lessons)
-    }
-  }, [lessons])
-
   // Check for completing all lessons
   useEffect(() => {
     if (
@@ -97,7 +90,7 @@ export const LearningPath = () => {
       : null
 
   // Map backend lessons to sidebar items (simple, DB-driven)
-  const lessonItems = (lessons || []).map((lesson) => {
+  const lessonItems = (lessons ?? []).map((lesson) => {
     const isCompleted = completedLessons.has(lesson.id)
     // TEMP: treat all as beginner until you wire real Level info
     const level: 'beginner' | 'mid' | 'pro' = 'beginner'
@@ -294,7 +287,15 @@ export const LearningPath = () => {
         <div className="min-h-screen flex flex-col">
           {/* Lesson Panel */}
           <div className="p-4 border-b border-slate-700 bg-slate-900">
-            <LessonPanel showCompleteButton={true} />
+            <LessonPanel
+              showCompleteButton={true}
+              lesson={currentLesson ?? undefined}
+              onComplete={handleCompleteLesson}
+              updateLesson={updateLesson}
+              isUpdating={isUpdating}
+              isLoading={isLoading}
+              isError={isError}
+            />
           </div>
 
           {/* Main Content Area */}
