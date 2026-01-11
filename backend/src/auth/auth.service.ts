@@ -24,7 +24,7 @@ export class AuthService {
       },
     });
 
-    return this.signToken(Number(user.id), user.email);
+    return this.signToken(user.id, user.email);
   }
 
   async signin(dto: SigninDto) {
@@ -38,14 +38,16 @@ export class AuthService {
 
     if (!passwordMatch) throw new UnauthorizedException('Invalid credentials');
 
-    return this.signToken(Number(user.id), user.email);
+    return this.signToken(user.id, user.email);
   }
 
-  private async signToken(userId: number, email: string) {
+  private async signToken(userId: string, email: string) {
     const payload = { sub: userId, email };
 
     return {
-      token: await this.jwt.signAsync(payload),
+      token: await this.jwt.signAsync(payload, {
+        expiresIn: '30d',
+      }),
     };
   }
 }

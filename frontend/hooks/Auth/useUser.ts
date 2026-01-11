@@ -17,19 +17,13 @@ interface useUserProps {
 }
 
 async function getUser(): Promise<User | null> {
-  const token = Cookies.get('token')
-
   try {
-    const response = await axiosInstance.get('me', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const response = await axiosInstance.get('auth/me', {
+      withCredentials: true,
     })
-
-    return response.data
+    return response.data.user
   } catch (error) {
-    Cookies.remove('token')
-    throw error
+    return null
   }
 }
 
@@ -40,7 +34,8 @@ export function useUser(): useUserProps {
     refetchOnMount: 'always',
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
-    enabled: !!Cookies.get('token'),
+    // enabled: !!Cookies.get('token'),
+    enabled: true,
   })
 
   return {
