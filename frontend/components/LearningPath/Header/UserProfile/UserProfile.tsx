@@ -4,13 +4,12 @@ import {
   User,
   Settings,
   LogOut,
-  RefreshCw,
   AlertTriangle,
-  X,
   Sparkles,
   Zap,
   Rocket,
 } from 'lucide-react'
+import ProfileSettingsModal from './ProfileSettingsModal'
 
 interface UserProfileProps {
   user: {
@@ -20,22 +19,17 @@ interface UserProfileProps {
   }
   onLogout: () => void
   onChangeLevel: (level: string) => void
-  onResetProgress: () => void
-  onProfileClick?: () => void
 }
 
 export default function UserProfile({
   user,
   onLogout,
   onChangeLevel,
-  onResetProgress,
-  onProfileClick,
 }: UserProfileProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [showSettings, setShowSettings] = useState(false)
+  const [showProfileSettings, setShowProfileSettings] = useState(false)
   const [showLevelWarning, setShowLevelWarning] = useState(false)
   const [pendingLevel, setPendingLevel] = useState<string | null>(null)
-  const [showResetWarning, setShowResetWarning] = useState(false)
 
   const levelConfig = {
     beginner: { icon: Sparkles, color: 'text-green-400', label: 'Beginner' },
@@ -48,31 +42,15 @@ export default function UserProfile({
   }
 
   const currentLevel = levelConfig[user.level as keyof typeof levelConfig]
-  const CurrentLevelIcon = currentLevel.icon
-
-  const handleLevelChange = (newLevel: string) => {
-    if (user.level === 'beginner' && newLevel !== 'beginner') {
-      setPendingLevel(newLevel)
-      setShowLevelWarning(true)
-    } else {
-      onChangeLevel(newLevel)
-      setShowSettings(false)
-    }
-  }
+  const CurrentLevelIcon = currentLevel?.icon || Sparkles
 
   const confirmLevelChange = () => {
     if (pendingLevel) {
       onChangeLevel(pendingLevel)
       setShowLevelWarning(false)
       setPendingLevel(null)
-      setShowSettings(false)
+      setShowProfileSettings(false)
     }
-  }
-
-  const confirmResetProgress = () => {
-    onResetProgress()
-    setShowResetWarning(false)
-    setShowSettings(false)
   }
 
   return (
@@ -89,8 +67,8 @@ export default function UserProfile({
           <div className="text-left hidden sm:block">
             <p className="text-sm font-medium text-white">{user.name}</p>
             <p className="text-xs text-slate-400 flex items-center gap-1">
-              <CurrentLevelIcon className={`w-3 h-3 ${currentLevel.color}`} />
-              {currentLevel.label}
+              <CurrentLevelIcon className={`w-3 h-3 ${currentLevel?.color || 'text-green-400'}`} />
+              {currentLevel?.label || 'Unknown'}
             </p>
           </div>
         </button>
@@ -117,22 +95,9 @@ export default function UserProfile({
 
                 {/* Menu Items */}
                 <div className="p-2">
-                  {onProfileClick && (
-                    <button
-                      onClick={() => {
-                        setIsOpen(false)
-                        onProfileClick()
-                      }}
-                      className="w-full flex items-center gap-3 px-3 py-2 text-slate-300 hover:bg-slate-800 rounded-lg transition-colors"
-                    >
-                      <Settings className="w-4 h-4" />
-                      <span>Profile Settings</span>
-                    </button>
-                  )}
-
                   <button
                     onClick={() => {
-                      setShowSettings(true)
+                      setShowProfileSettings(true)
                       setIsOpen(false)
                     }}
                     className="w-full flex items-center gap-3 px-3 py-2 text-slate-300 hover:bg-slate-800 rounded-lg transition-colors"
@@ -155,90 +120,20 @@ export default function UserProfile({
         </AnimatePresence>
       </div>
 
-      {/* Settings Modal */}
-      <AnimatePresence>
-        {showSettings && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowSettings(false)}
-              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            />
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="relative bg-slate-900 rounded-xl border-2 border-slate-700 shadow-2xl max-w-md w-full"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-slate-700">
-                <h2 className="text-xl font-bold text-white">Settings</h2>
-                <button
-                  onClick={() => setShowSettings(false)}
-                  className="p-2 rounded-lg hover:bg-slate-800 transition-colors"
-                >
-                  <X className="w-5 h-5 text-slate-400" />
-                </button>
-              </div>
-
-              {/* Content */}
-              <div className="p-6 space-y-6">
-                {/* Change Level */}
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-300 mb-3">
-                    Git Knowledge Level
-                  </h3>
-                  <div className="space-y-2">
-                    {Object.entries(levelConfig).map(([key, config]) => {
-                      const Icon = config.icon
-                      const isActive = user.level === key
-
-                      return (
-                        <button
-                          key={key}
-                          onClick={() => handleLevelChange(key)}
-                          className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${
-                            isActive
-                              ? 'bg-emerald-500/10 border-emerald-500/50'
-                              : 'bg-slate-800 border-slate-700 hover:border-slate-600'
-                          }`}
-                        >
-                          <Icon className={`w-5 h-5 ${config.color}`} />
-                          <span className="text-white font-medium">
-                            {config.label}
-                          </span>
-                          {isActive && (
-                            <span className="ml-auto text-xs text-emerald-400">
-                              Current
-                            </span>
-                          )}
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-
-                {/* Reset Progress */}
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-300 mb-3">
-                    Danger Zone
-                  </h3>
-                  <button
-                    onClick={() => setShowResetWarning(true)}
-                    className="w-full flex items-center gap-3 p-3 bg-red-500/10 border-2 border-red-500/50 rounded-lg text-red-400 hover:bg-red-500/20 transition-all"
-                  >
-                    <RefreshCw className="w-5 h-5" />
-                    <span className="font-medium">Reset Learning Progress</span>
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {/* Profile Settings Modal */}
+      <ProfileSettingsModal
+        isOpen={showProfileSettings}
+        onClose={() => setShowProfileSettings(false)}
+        user={user}
+        onChangeLevel={(level) => {
+          if (user.level === 'beginner' && level !== 'beginner') {
+            setPendingLevel(level)
+            setShowLevelWarning(true)
+          } else {
+            onChangeLevel(level)
+          }
+        }}
+      />
 
       {/* Level Change Warning */}
       <AnimatePresence>
@@ -251,19 +146,6 @@ export default function UserProfile({
               setShowLevelWarning(false)
               setPendingLevel(null)
             }}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Reset Progress Warning */}
-      <AnimatePresence>
-        {showResetWarning && (
-          <WarningModal
-            title="Reset All Progress?"
-            message="This will delete all your completed lessons and achievements. This action cannot be undone."
-            onConfirm={confirmResetProgress}
-            onCancel={() => setShowResetWarning(false)}
-            danger
           />
         )}
       </AnimatePresence>

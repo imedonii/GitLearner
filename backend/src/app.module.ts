@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { LeasonsModule } from './leasons/leasons.module';
 import { LevelsModule } from './levels/levels.module';
 import { UserLessonProgressModule } from './user-lesson-progress/user-lesson-progress.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { UserLessonProgressModule } from './user-lesson-progress/user-lesson-pro
     LeasonsModule,
     LevelsModule,
     UserLessonProgressModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

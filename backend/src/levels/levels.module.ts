@@ -4,6 +4,7 @@ import { LevelsService } from './levels.service';
 
 @Module({
   controllers: [LevelsController],
-  providers: [LevelsService]
+  providers: [LevelsService],
+  exports: [LevelsService],
 })
 export class LevelsModule {}

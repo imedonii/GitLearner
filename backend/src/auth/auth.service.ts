@@ -1,19 +1,38 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { SigninDto } from './dto/signin.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { MailService } from '../mail/mail.service';
+import { LevelsService } from '../levels/levels.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
+    private mailService: MailService,
+    private levelsService: LevelsService,
   ) {}
+
+  private generateVerificationCode(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
 
   async register(dto: RegisterDto) {
     const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const verificationCode = this.generateVerificationCode();
+    const verificationCodeExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
     const user = await this.prisma.user.create({
       data: {
@@ -21,7 +40,16 @@ export class AuthService {
         email: dto.email,
         password: hashedPassword,
         levelId: dto.levelId,
+        verificationCode,
+        verificationCodeExpiry,
       },
+    });
+
+    // Send verification email
+    await this.mailService.sendVerificationEmail({
+      to: user.email,
+      name: user.fullName,
+      verificationCode,
     });
 
     return this.signToken(user.id, user.email);
@@ -39,6 +67,214 @@ export class AuthService {
     if (!passwordMatch) throw new UnauthorizedException('Invalid credentials');
 
     return this.signToken(user.id, user.email);
+  }
+
+  async verifyEmail(email: string, code: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (user.isVerified) {
+      return { success: true, message: 'Email already verified' };
+    }
+
+    if (!user.verificationCode || !user.verificationCodeExpiry) {
+      throw new BadRequestException('No verification code found');
+    }
+
+    if (new Date() > user.verificationCodeExpiry) {
+      throw new BadRequestException('Verification code has expired');
+    }
+
+    if (user.verificationCode !== code) {
+      throw new BadRequestException('Invalid verification code');
+    }
+
+    await this.prisma.user.update({
+      where: { email },
+      data: {
+        isVerified: true,
+        verificationCode: null,
+        verificationCodeExpiry: null,
+      },
+    });
+
+    return { success: true, message: 'Email verified successfully' };
+  }
+
+  async resendVerificationEmail(email: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (user.isVerified) {
+      throw new BadRequestException('Email already verified');
+    }
+
+    const verificationCode = this.generateVerificationCode();
+    const verificationCodeExpiry = new Date(Date.now() + 15 * 60 * 1000);
+
+    await this.prisma.user.update({
+      where: { email },
+      data: {
+        verificationCode,
+        verificationCodeExpiry,
+      },
+    });
+
+    await this.mailService.sendVerificationEmail({
+      to: user.email,
+      name: user.fullName,
+      verificationCode,
+    });
+
+    return { success: true, message: 'Verification email sent' };
+  }
+
+  async setUserLevel(userId: string, levelSlug: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    const level = await this.levelsService.findBySlug(levelSlug);
+
+    if (!level) {
+      throw new BadRequestException('Level not found');
+    }
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { levelId: level.id },
+    });
+
+    return { success: true, message: 'User level updated successfully' };
+  }
+
+  async updateProfile(userId: string, dto: UpdateProfileDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Check if email is already taken by another user
+    if (dto.email && dto.email !== user.email) {
+      const existingUser = await this.prisma.user.findUnique({
+        where: { email: dto.email },
+      });
+      if (existingUser) {
+        throw new BadRequestException('Email is already in use');
+      }
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(dto.fullName && { fullName: dto.fullName }),
+        ...(dto.email && { email: dto.email }),
+      },
+      include: {
+        level: true,
+      },
+    });
+
+    return {
+      success: true,
+      user: {
+        id: updatedUser.id,
+        fullName: updatedUser.fullName,
+        email: updatedUser.email,
+        levelId: updatedUser.levelId,
+        level: updatedUser.level,
+      },
+    };
+  }
+
+  async changePassword(userId: string, dto: ChangePasswordDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    const passwordMatch = await bcrypt.compare(dto.currentPassword, user.password);
+    if (!passwordMatch) {
+      throw new BadRequestException('Current password is incorrect');
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.newPassword, 10);
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+
+    return { success: true, message: 'Password changed successfully' };
+  }
+
+  async getUserProgress(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        level: true,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Get all completed lessons for this user
+    const completedLessons = await this.prisma.userLeasonProgress.findMany({
+      where: {
+        userId,
+        isCompleted: true,
+      },
+      include: {
+        leason: true,
+      },
+    });
+
+    // Get total lessons count
+    const totalLessons = await this.prisma.leasons.count();
+
+    return {
+      user: {
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        level: user.level,
+      },
+      progress: {
+        completedLessons: completedLessons.length,
+        totalLessons,
+        percentage: totalLessons > 0 ? Math.round((completedLessons.length / totalLessons) * 100) : 0,
+        recentCompletions: completedLessons
+          .sort((a, b) => new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime())
+          .slice(0, 5)
+          .map((p) => ({
+            lessonId: p.leasonId,
+            lessonTitle: p.leason.title,
+            completedAt: p.completedAt,
+          })),
+      },
+    };
   }
 
   private async signToken(userId: string, email: string) {

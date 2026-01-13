@@ -3,17 +3,33 @@ import { QUERY_KEY } from '../queryKeys'
 import { axiosInstance } from '@/api'
 import Cookies from 'js-cookie'
 
+export interface UserLevel {
+  id: string
+  name: string
+  slug: string
+}
+
 export interface User {
-  id: number
+  id: string
   fullName: string
   email: string
-  level: number
-  token: string
+  levelId: string | null
+  level: UserLevel | null
 }
 
 interface useUserProps {
   user: User | null
   isLoading: boolean
+}
+
+// Maps backend level slugs to frontend config keys
+export const levelSlugToKey = (slug: string | null | undefined): 'beginner' | 'intermediate' | 'pro' => {
+  const mapping: Record<string, 'beginner' | 'intermediate' | 'pro'> = {
+    'new_here': 'beginner',
+    'i_know_things': 'intermediate',
+    'pro_level': 'pro',
+  }
+  return mapping[slug || ''] || 'beginner'
 }
 
 async function getUser(): Promise<User | null> {

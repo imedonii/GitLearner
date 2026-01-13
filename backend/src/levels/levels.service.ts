@@ -19,6 +19,10 @@ export class LevelsService {
     return this.prisma.level.findUnique({ where: { id } });
   }
 
+  findBySlug(slug: string) {
+    return this.prisma.level.findUnique({ where: { slug } });
+  }
+
   update(id: string, dto: UpdateLevelDto) {
     return this.prisma.level.update({
       where: { id },

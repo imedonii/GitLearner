@@ -1,15 +1,13 @@
 'use client'
 
-import { useState } from 'react'
 import { Rocket, Sparkles, Zap, Trophy } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { useUser } from '@/hooks/Auth/useUser'
+import { useUser, levelSlugToKey } from '@/hooks/Auth/useUser'
 import UserProfile from './UserProfile/UserProfile'
 import { LevelBadge } from './LevelBadge/LevelBadge'
 
 interface HeaderProps {
   onShowAchievements?: () => void
-  onProfileClick?: () => void
   achievementsCount?: { unlocked: number; total: number }
   progressPercentage?: number
   gitLevel?: string
@@ -17,14 +15,11 @@ interface HeaderProps {
 
 export const Header = ({
   onShowAchievements,
-  onProfileClick,
   achievementsCount = { unlocked: 0, total: 6 },
   progressPercentage = 0,
   gitLevel = 'beginner',
 }: HeaderProps) => {
   const { user } = useUser()
-  const [showSettings, setShowSettings] = useState(false)
-  const [showResetWarning, setShowResetWarning] = useState(false)
 
   const getNextMilestone = () => {
     if (progressPercentage < 50) {
@@ -64,19 +59,18 @@ export const Header = ({
     },
   }
 
-  const config = levelConfig[gitLevel]
+  const config = levelConfig[gitLevel as keyof typeof levelConfig] || levelConfig.beginner
   const Icon = config.icon
 
-  const currentLevel = levelConfig[user?.level ? 'beginner' : 'intermediate']
-  const CurrentLevelIcon = currentLevel.icon
-
-  const confirmResetProgress = () => {
-    // onResetProgress()
-    setShowResetWarning(false)
-    setShowSettings(false)
-  }
+  const userLevelKey = levelSlugToKey(user?.level?.slug)
+  const currentLevel = levelConfig[userLevelKey]
 
   const onLogout = () => {}
+
+  const onChangeLevel = (level: string) => {
+    // TODO: Implement level change via API
+    console.log('Change level to:', level)
+  }
 
   return (
     <header className="h-18 z-9999 fixed w-[calc(100%-20rem)] px-5 py-2 ml-80 bg-slate-900/95 backdrop-blur-sm border-b border-slate-700 shadow-lg">
@@ -110,10 +104,10 @@ export const Header = ({
           user={{
             name: user?.fullName || '',
             email: user?.email || '',
-            level: user?.level || 'beginner',
+            level: userLevelKey,
           }}
           onLogout={onLogout}
-          onProfileClick={onProfileClick}
+          onChangeLevel={onChangeLevel}
         />
       </div>
     </header>

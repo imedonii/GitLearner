@@ -3,6 +3,7 @@
 import { Check, GitBranch, Lock, Rocket, Sparkles, Zap } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 export type KnowledgeLevel = 'beginner' | 'intermediate' | 'pro'
 
@@ -20,6 +21,7 @@ interface LevelCard {
   color: string
   iconColor: string
   borderColor: string
+  slug: string
 }
 
 const levels: LevelCard[] = [
@@ -38,6 +40,7 @@ const levels: LevelCard[] = [
     color: 'from-green-500 to-emerald-500',
     iconColor: 'text-green-400',
     borderColor: 'border-green-500/50',
+    slug: 'new_here',
   },
   {
     id: 'intermediate',
@@ -54,6 +57,7 @@ const levels: LevelCard[] = [
     color: 'from-yellow-500 to-orange-500',
     iconColor: 'text-yellow-400',
     borderColor: 'border-yellow-500/50',
+    slug: 'i_know_things',
   },
   {
     id: 'pro',
@@ -70,21 +74,48 @@ const levels: LevelCard[] = [
     color: 'from-red-500 to-pink-500',
     iconColor: 'text-red-400',
     borderColor: 'border-red-500/50',
+    slug: 'pro_level',
   },
 ]
 
 export const Level = () => {
-  const [selectedLevel, setSelectedLevel] = useState<KnowledgeLevel | null>(
-    null
-  )
+  const router = useRouter()
+  const [selectedLevel, setSelectedLevel] = useState<KnowledgeLevel>('beginner')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleSelect = (level: KnowledgeLevel) => {
-    setSelectedLevel(level)
-  }
+  const handleContinue = async () => {
+    if (!selectedLevel) return
 
-  const handleContinue = () => {
-    if (selectedLevel) {
-      //   onSelectLevel(selectedLevel)
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const selectedLevelData = levels.find((l) => l.id === selectedLevel)
+      if (!selectedLevelData) return
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/set-level`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({ levelSlug: selectedLevelData.slug }),
+        }
+      )
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.message || 'Failed to set level')
+      }
+
+      router.push('/learning-path')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -118,20 +149,31 @@ export const Level = () => {
           {levels.map((level, index) => {
             const Icon = level.icon
             const isSelected = selectedLevel === level.id
+            const isDisabled = level.id !== 'beginner'
 
             return (
-              <motion.button
+              <motion.div
                 key={level.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                onClick={() => handleSelect(level.id)}
-                className={`relative bg-slate-900 border-2 rounded-xl p-6 text-left transition-all hover:scale-105 ${
+                className={`relative bg-slate-900 border-2 rounded-xl p-6 text-left transition-all ${
+                  isDisabled
+                    ? 'opacity-50 cursor-not-allowed'
+                    : ''
+                } ${
                   isSelected
                     ? `${level.borderColor} shadow-lg`
-                    : 'border-slate-700 hover:border-slate-600'
+                    : 'border-slate-700'
                 }`}
               >
+                {/* Coming Soon Badge for disabled levels */}
+                {isDisabled && (
+                  <div className="absolute top-3 right-3 px-2 py-1 bg-slate-700 text-slate-400 text-xs rounded-full">
+                    Coming Soon
+                  </div>
+                )}
+
                 {/* Selection Indicator */}
                 {isSelected && (
                   <motion.div
@@ -177,10 +219,17 @@ export const Level = () => {
                     </div>
                   ))}
                 </div>
-              </motion.button>
+              </motion.div>
             )
           })}
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="text-center mb-4">
+            <p className="text-red-400 text-sm">{error}</p>
+          </div>
+        )}
 
         {/* Continue Button */}
         <motion.div
@@ -191,16 +240,16 @@ export const Level = () => {
         >
           <button
             onClick={handleContinue}
-            disabled={!selectedLevel}
+            disabled={!selectedLevel || isLoading}
             className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 disabled:from-slate-700 disabled:to-slate-700 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all text-lg"
           >
-            {selectedLevel ? 'Continue' : 'Select a level to continue'}
+            {isLoading ? 'Setting up...' : 'Continue'}
           </button>
         </motion.div>
 
         {/* Help Text */}
         <p className="text-center text-sm text-slate-500 mt-6">
-          Don't worry, you can change this later in settings
+          Other levels will be available soon
         </p>
       </motion.div>
     </div>

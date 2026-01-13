@@ -17,7 +17,7 @@ import { executeGitCommand, GitState, initialGitState } from '@/utils'
 import { useLessons } from '@/hooks/Lessons/useLessons'
 import Sidebar from './Sidebar'
 import type { KnowledgeLevel } from './KnowledgeLevelPage'
-import { useUser } from '@/hooks/Auth/useUser'
+import { useUser, levelSlugToKey } from '@/hooks/Auth/useUser'
 import { useRouter } from 'next/navigation'
 
 export const LearningPath = () => {
@@ -36,23 +36,6 @@ export const LearningPath = () => {
     new Set()
   )
   const [achievements, setAchievements] = useState(initialAchievements)
-
-  const mapNumericToKnowledgeLevel = (
-    level?: number
-  ): KnowledgeLevel | undefined => {
-    if (level === undefined || level === null) return undefined
-
-    switch (level) {
-      case 1:
-        return 'beginner'
-      case 2:
-        return 'intermediate'
-      case 3:
-        return 'pro'
-      default:
-        return undefined
-    }
-  }
 
   const onPlayground = () => {
     router.push('/playground')
@@ -279,7 +262,7 @@ export const LearningPath = () => {
         onGoHome={onGoHome}
         onPlayground={onPlayground}
         onCheatSheet={onCheatSheet}
-        userLevel={mapNumericToKnowledgeLevel(user?.level)}
+        userLevel={levelSlugToKey(user?.level?.slug)}
       />
 
       {/* Main Content Area - with margin for fixed sidebar, entire page scrollable */}
