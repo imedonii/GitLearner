@@ -3,6 +3,7 @@
 import { Rocket, Sparkles, Zap, Trophy } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useUser, levelSlugToKey } from '@/hooks/Auth/useUser'
+import { useLogout } from '@/hooks/Auth/useLogout'
 import UserProfile from './UserProfile/UserProfile'
 import { LevelBadge } from './LevelBadge/LevelBadge'
 
@@ -20,6 +21,7 @@ export const Header = ({
   gitLevel = 'beginner',
 }: HeaderProps) => {
   const { user } = useUser()
+  const { logout } = useLogout()
 
   const getNextMilestone = () => {
     if (progressPercentage < 50) {
@@ -65,7 +67,9 @@ export const Header = ({
   const userLevelKey = levelSlugToKey(user?.level?.slug)
   const currentLevel = levelConfig[userLevelKey]
 
-  const onLogout = () => {}
+  const onLogout = () => {
+    logout()
+  }
 
   const onChangeLevel = (level: string) => {
     // TODO: Implement level change via API
