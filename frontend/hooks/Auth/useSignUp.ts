@@ -17,7 +17,8 @@ type useSignUpProps = UseMutateFunction<
   registrationResponse,
   unknown,
   {
-    fullName: string
+    firstName: string
+    lastName: string
     email: string
     password: string
   },
@@ -25,7 +26,8 @@ type useSignUpProps = UseMutateFunction<
 >
 
 async function signUp(payload: {
-  fullName: string
+  firstName: string
+  lastName: string
   email: string
   password: string
 }): Promise<registrationResponse> {
@@ -50,7 +52,8 @@ export function useSignUp(): {
     registrationResponse,
     Error,
     {
-      fullName: string
+      firstName: string
+      lastName: string
       email: string
       password: string
     },

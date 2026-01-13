@@ -13,7 +13,8 @@ import ProfileSettingsModal from './ProfileSettingsModal'
 
 interface UserProfileProps {
   user: {
-    name: string
+    firstName: string
+    lastName: string
     email: string
     level: string
   }
@@ -65,7 +66,7 @@ export default function UserProfile({
             <User className="w-4 h-4 text-white" />
           </div>
           <div className="text-left hidden sm:block">
-            <p className="text-sm font-medium text-white">{user.name}</p>
+            <p className="text-sm font-medium text-white">{user.firstName} {user.lastName}</p>
             <p className="text-xs text-slate-400 flex items-center gap-1">
               <CurrentLevelIcon className={`w-3 h-3 ${currentLevel?.color || 'text-green-400'}`} />
               {currentLevel?.label || 'Unknown'}
@@ -89,7 +90,7 @@ export default function UserProfile({
               >
                 {/* User Info */}
                 <div className="p-4 border-b border-slate-700">
-                  <p className="font-semibold text-white">{user.name}</p>
+                  <p className="font-semibold text-white">{user.firstName} {user.lastName}</p>
                   <p className="text-sm text-slate-400">{user.email}</p>
                 </div>
 

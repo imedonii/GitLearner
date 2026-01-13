@@ -10,7 +10,8 @@ export class UsersService {
   async create(dto: CreateUserDto) {
     return this.prisma.user.create({
       data: {
-        fullName: dto.fullName,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
         email: dto.email,
         password: dto.password,
         level: {

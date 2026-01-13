@@ -8,7 +8,10 @@ import {
 
 export class CreateUserDto {
   @IsString()
-  fullName!: string;
+  firstName!: string;
+
+  @IsString()
+  lastName!: string;
 
   @IsEmail()
   email!: string;

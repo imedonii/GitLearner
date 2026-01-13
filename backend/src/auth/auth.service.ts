@@ -36,7 +36,8 @@ export class AuthService {
 
     const user = await this.prisma.user.create({
       data: {
-        fullName: dto.fullName,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
         email: dto.email,
         password: hashedPassword,
         levelId: dto.levelId,
@@ -48,7 +49,7 @@ export class AuthService {
     // Send verification email
     await this.mailService.sendVerificationEmail({
       to: user.email,
-      name: user.fullName,
+      name: `${user.firstName} ${user.lastName}`,
       verificationCode,
     });
 
@@ -132,7 +133,7 @@ export class AuthService {
 
     await this.mailService.sendVerificationEmail({
       to: user.email,
-      name: user.fullName,
+      name: `${user.firstName} ${user.lastName}`,
       verificationCode,
     });
 
@@ -184,7 +185,8 @@ export class AuthService {
     const updatedUser = await this.prisma.user.update({
       where: { id: userId },
       data: {
-        ...(dto.fullName && { fullName: dto.fullName }),
+        ...(dto.firstName && { firstName: dto.firstName }),
+        ...(dto.lastName && { lastName: dto.lastName }),
         ...(dto.email && { email: dto.email }),
       },
       include: {
@@ -196,7 +198,8 @@ export class AuthService {
       success: true,
       user: {
         id: updatedUser.id,
-        fullName: updatedUser.fullName,
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
         email: updatedUser.email,
         levelId: updatedUser.levelId,
         level: updatedUser.level,
@@ -257,7 +260,8 @@ export class AuthService {
     return {
       user: {
         id: user.id,
-        fullName: user.fullName,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
         level: user.level,
       },

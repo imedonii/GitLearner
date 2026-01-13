@@ -11,7 +11,8 @@ export interface UserLevel {
 
 export interface User {
   id: string
-  fullName: string
+  firstName: string
+  lastName: string
   email: string
   levelId: string | null
   level: UserLevel | null

@@ -102,7 +102,8 @@ export const Header = ({
 
         <UserProfile
           user={{
-            name: user?.fullName || '',
+            firstName: user?.firstName || '',
+            lastName: user?.lastName || '',
             email: user?.email || '',
             level: userLevelKey,
           }}

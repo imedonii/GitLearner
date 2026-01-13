@@ -3,7 +3,8 @@ import { QUERY_KEY } from '../queryKeys'
 import { axiosInstance } from '@/api'
 
 export interface UpdateProfileData {
-  fullName?: string
+  firstName?: string
+  lastName?: string
   email?: string
 }
 
@@ -26,7 +27,8 @@ export interface UserProgress {
 export interface ProgressResponse {
   user: {
     id: string
-    fullName: string
+    firstName: string
+    lastName: string
     email: string
     level: {
       id: string

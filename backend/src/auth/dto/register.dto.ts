@@ -8,7 +8,10 @@ import {
 
 export class RegisterDto {
   @IsString()
-  fullName!: string;
+  firstName!: string;
+
+  @IsString()
+  lastName!: string;
 
   @IsEmail()
   email!: string;
