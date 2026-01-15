@@ -15,7 +15,6 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/UI'
 import { useState } from 'react'
-import HelpDialog from './HelpDialog'
 import { KnowledgeLevel } from './KnowledgeLevelPage'
 import { LessonLevel } from '@/utils/lessons'
 
@@ -35,6 +34,7 @@ interface SidebarProps {
   onGoHome: () => void
   onPlayground: () => void
   onCheatSheet: () => void
+  onHelpAndTips: () => void
   userLevel?: KnowledgeLevel
 }
 
@@ -55,9 +55,9 @@ export default function Sidebar({
   onGoHome,
   onPlayground,
   onCheatSheet,
+  onHelpAndTips,
   userLevel,
 }: SidebarProps) {
-  const [showHelp, setShowHelp] = useState(false)
   const [expandedLevels, setExpandedLevels] = useState<Set<LessonLevel>>(
     new Set(['beginner', 'mid', 'pro'])
   )
@@ -140,7 +140,7 @@ export default function Sidebar({
       <div className="p-4 border-b border-slate-700 space-y-2 flex-shrink-0">
         <Button
           variant="ghost"
-          className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800"
+          className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800 cursor-pointer"
           onClick={onGoHome}
         >
           <Home className="w-4 h-4 mr-2" />
@@ -148,7 +148,7 @@ export default function Sidebar({
         </Button>
         <Button
           variant="ghost"
-          className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800"
+          className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800 cursor-pointer"
           onClick={onPlayground}
         >
           <Code className="w-4 h-4 mr-2" />
@@ -156,7 +156,7 @@ export default function Sidebar({
         </Button>
         <Button
           variant="ghost"
-          className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800"
+          className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800 cursor-pointer"
           onClick={onCheatSheet}
         >
           <Zap className="w-4 h-4 mr-2" />
@@ -164,8 +164,8 @@ export default function Sidebar({
         </Button>
         <Button
           variant="ghost"
-          className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800"
-          onClick={() => setShowHelp(true)}
+          className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800 cursor-pointer"
+          onClick={onHelpAndTips}
         >
           <HelpCircle className="w-4 h-4 mr-2" />
           Help & Tips
@@ -304,8 +304,6 @@ export default function Sidebar({
           })}
         </div>
       </div>
-
-      <HelpDialog open={showHelp} onOpenChange={setShowHelp} />
     </div>
   )
 }

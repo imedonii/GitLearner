@@ -45,6 +45,10 @@ export const LearningPath = () => {
     router.push('/cheatsheet')
   }
 
+  const onHelpAndTips = () => {
+    router.push('/help')
+  }
+
   const onGoHome = () => {
     router.push('/')
   }
@@ -262,6 +266,7 @@ export const LearningPath = () => {
         onGoHome={onGoHome}
         onPlayground={onPlayground}
         onCheatSheet={onCheatSheet}
+        onHelpAndTips={onHelpAndTips}
         userLevel={levelSlugToKey(user?.level?.slug)}
       />
 
