@@ -216,7 +216,10 @@ export class AuthService {
       throw new BadRequestException('User not found');
     }
 
-    const passwordMatch = await bcrypt.compare(dto.currentPassword, user.password);
+    const passwordMatch = await bcrypt.compare(
+      dto.currentPassword,
+      user.password,
+    );
     if (!passwordMatch) {
       throw new BadRequestException('Current password is incorrect');
     }
@@ -268,9 +271,16 @@ export class AuthService {
       progress: {
         completedLessons: completedLessons.length,
         totalLessons,
-        percentage: totalLessons > 0 ? Math.round((completedLessons.length / totalLessons) * 100) : 0,
+        percentage:
+          totalLessons > 0
+            ? Math.round((completedLessons.length / totalLessons) * 100)
+            : 0,
         recentCompletions: completedLessons
-          .sort((a, b) => new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime())
+          .sort(
+            (a, b) =>
+              new Date(b.completedAt).getTime() -
+              new Date(a.completedAt).getTime(),
+          )
           .slice(0, 5)
           .map((p) => ({
             lessonId: p.leasonId,

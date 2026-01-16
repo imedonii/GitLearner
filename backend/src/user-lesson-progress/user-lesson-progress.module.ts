@@ -4,6 +4,6 @@ import { UserLessonProgressService } from './user-lesson-progress.service';
 
 @Module({
   controllers: [UserLessonProgressController],
-  providers: [UserLessonProgressService]
+  providers: [UserLessonProgressService],
 })
 export class UserLessonProgressModule {}

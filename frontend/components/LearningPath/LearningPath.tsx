@@ -32,9 +32,6 @@ export const LearningPath = () => {
     useState<Achievement | null>(null)
   const [showAchievements, setShowAchievements] = useState(false)
   const [totalCommits, setTotalCommits] = useState(0)
-  const [completedLessons, setCompletedLessons] = useState<Set<string>>(
-    new Set()
-  )
   const [achievements, setAchievements] = useState(initialAchievements)
 
   const onPlayground = () => {
@@ -80,33 +77,33 @@ export const LearningPath = () => {
   useEffect(() => {
     if (
       lessons &&
-      completedLessons.size === lessons.length &&
+      lessons.filter((l) => l.completed).length === lessons.length &&
       lessons.length > 0
     ) {
       unlockAchievement('complete-all')
     }
-  }, [completedLessons, lessons, unlockAchievement])
+  }, [lessons, unlockAchievement])
 
   const currentLesson =
     lessons && currentLessonId
       ? lessons.find((l) => l.id === currentLessonId) || null
       : null
 
-  // Map backend lessons to sidebar items (simple, DB-driven)
-  const lessonItems = (lessons ?? []).map((lesson) => {
-    const isCompleted = completedLessons.has(lesson.id)
-    // TEMP: treat all as beginner until you wire real Level info
-    const level: 'beginner' | 'mid' | 'pro' = 'beginner'
+  // Map backend lessons to sidebar items with progress from backend
+  const lessonItems = Array.isArray(lessons)
+    ? lessons.map((lesson) => {
+        const level: 'beginner' | 'mid' | 'pro' = 'beginner'
 
-    return {
-      id: lesson.id,
-      title: lesson.title,
-      completed: isCompleted,
-      locked: false,
-      level,
-      description: lesson.description,
-    }
-  })
+        return {
+          id: lesson.id,
+          title: lesson.title,
+          completed: lesson.completed,
+          locked: lesson.locked,
+          level,
+          description: lesson.description,
+        }
+      })
+    : []
 
   const handleCommand = (command: string) => {
     const result = executeGitCommand(command, gitState)
@@ -197,12 +194,6 @@ export const LearningPath = () => {
   const handleCompleteLesson = () => {
     if (!currentLessonId) return
 
-    setCompletedLessons((prev) => {
-      const newCompleted = new Set(prev)
-      newCompleted.add(currentLessonId)
-      return newCompleted
-    })
-
     // toast.success('Lesson completed! ')
 
     // Auto-advance to next lesson after 1.5 seconds
@@ -211,7 +202,11 @@ export const LearningPath = () => {
 
       const currentIndex = lessons.findIndex((l) => l.id === currentLessonId)
       if (currentIndex < lessons.length - 1) {
-        setCurrentLessonId(lessons[currentIndex + 1].id)
+        const nextLesson = lessons[currentIndex + 1]
+        // Only advance if the next lesson is not locked
+        if (!nextLesson.locked) {
+          setCurrentLessonId(nextLesson.id)
+        }
       }
     }, 1500)
   }
@@ -235,7 +230,7 @@ export const LearningPath = () => {
     )
   if (isError)
     return <div className="text-red-500 p-4">Error loading lessons</div>
-  if (!lessons || lessons.length === 0)
+  if (!Array.isArray(lessons) || lessons.length === 0)
     return <div className="p-4">No lessons available</div>
 
   if (currentLessonId && !currentLesson) {

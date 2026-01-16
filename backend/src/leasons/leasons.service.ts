@@ -4,6 +4,23 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateLeasonDto } from './dto/create-leason.dto';
 import { UpdateLeasonDto } from './dto/update-leason.dto';
 
+export interface LessonWithProgress {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  explanation: string;
+  exampleCommand: string;
+  hint: string;
+  objective: string;
+  levelId: string;
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
+  completed: boolean;
+  locked: boolean;
+}
+
 @Injectable()
 export class LeasonsService {
   constructor(private prisma: PrismaService) {}
@@ -29,5 +46,77 @@ export class LeasonsService {
 
   remove(id: string) {
     return this.prisma.leasons.delete({ where: { id } });
+  }
+
+  async findWithProgress(userId: string, levelId?: string): Promise<LessonWithProgress[]> {
+    const whereClause: any = {};
+    if (levelId) {
+      whereClause.levelId = levelId;
+    }
+
+    const lessons = await this.prisma.leasons.findMany({
+      where: whereClause,
+      include: {
+        level: true,
+      },
+      orderBy: {
+        order: 'asc',
+      },
+    });
+
+    if (!lessons || lessons.length === 0) {
+      return [];
+    }
+
+    const userProgress = await this.prisma.userLeasonProgress.findMany({
+      where: {
+        userId,
+        leasonId: {
+          in: lessons.map((l) => l.id),
+        },
+      },
+    });
+
+    const progressMap = new Map(
+      userProgress.map((p) => [p.leasonId, p.isCompleted]),
+    );
+
+    const lessonsWithLock: LessonWithProgress[] = lessons.map((lesson) => {
+      const isCompleted = progressMap.get(lesson.id) || false;
+
+      return {
+        id: lesson.id,
+        slug: lesson.slug,
+        title: lesson.title,
+        description: lesson.description,
+        explanation: lesson.explanation,
+        exampleCommand: lesson.exampleCommand,
+        hint: lesson.hint,
+        objective: lesson.objective,
+        levelId: lesson.levelId,
+        order: lesson.order,
+        createdAt: lesson.createdAt,
+        updatedAt: lesson.updatedAt,
+        completed: isCompleted,
+        locked: !this.isLessonUnlocked(lesson.id, lessons, progressMap),
+      };
+    });
+
+    return lessonsWithLock;
+  }
+
+  private isLessonUnlocked(
+    lessonId: string,
+    lessons: any[],
+    progressMap: Map<string, boolean>
+  ): boolean {
+    const currentIndex = lessons.findIndex((l) => l.id === lessonId);
+
+    if (currentIndex === 0) {
+      return true;
+    }
+
+    const previousLesson = lessons[currentIndex - 1];
+    return progressMap.get(previousLesson.id) === true;
   }
 }

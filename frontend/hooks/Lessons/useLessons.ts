@@ -12,9 +12,11 @@ export interface Lesson {
   hint: string
   objective: string
   levelId: string
+  order: number
   createdAt: string
   updatedAt: string
   completed: boolean
+  locked: boolean
 }
 
 interface UseLessonsReturn {
@@ -33,14 +35,19 @@ interface UseLessonsReturn {
   isDeleting: boolean
 }
 
-// Fetch all lessons
+// Fetch all lessons with progress
 async function fetchLessons(): Promise<Lesson[]> {
   try {
-    const response = await axiosInstance.get<Lesson[]>('leasons')
-    return response.data
+    const response = await axiosInstance.get<Lesson[]>('leasons/my-progress')
+    const data = response.data
+    if (!Array.isArray(data)) {
+      console.error('API did not return an array:', data)
+      return []
+    }
+    return data
   } catch (error) {
     console.error('Error fetching lessons:', error)
-    throw error
+    return []
   }
 }
 

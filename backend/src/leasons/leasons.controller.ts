@@ -7,10 +7,14 @@ import {
   Delete,
   Param,
   Body,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
-import { LeasonsService } from './leasons.service';
+import { LeasonsService, LessonWithProgress } from './leasons.service';
 import { CreateLeasonDto } from './dto/create-leason.dto';
 import { UpdateLeasonDto } from './dto/update-leason.dto';
+import { AuthGuard } from '@nestjs/passport';
+import type { Request } from 'express';
 
 @Controller('leasons')
 export class LeasonsController {
@@ -24,6 +28,19 @@ export class LeasonsController {
   @Get()
   findAll() {
     return this.leasonsService.findAll();
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('my-progress')
+  async findMyProgress(@Req() req: Request): Promise<LessonWithProgress[]> {
+    const userId = (req as any).user?.id;
+    const levelId = req.query.levelId as string | undefined;
+
+    if (!userId) {
+      return [];
+    }
+
+    return await this.leasonsService.findWithProgress(userId, levelId);
   }
 
   @Get(':id')
