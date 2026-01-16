@@ -41,13 +41,8 @@ async function main() {
 
   // 3️⃣ Seed Leasons from lessons array
   for (const lesson of lessons) {
-    // Assign levelId based on some logic, e.g. beginner → 'new_here', intermediate → 'i_know_things', pro → 'pro_level'
-    // Here we'll map by index as an example
-    let levelSlug = 'new_here';
-    if (lesson.id === 'branch' || lesson.id === 'checkout')
-      levelSlug = 'i_know_things';
-    if (lesson.id === 'rebase' || lesson.id === 'merge')
-      levelSlug = 'pro_level';
+    // All lessons are assigned to 'new_here' level
+    const levelSlug = 'new_here';
 
     await prisma.leasons.upsert({
       where: { slug: lesson.id }, // use your `slug` column
@@ -60,6 +55,8 @@ async function main() {
         exampleCommand: lesson.exampleCommand,
         hint: lesson.hint,
         objective: lesson.objective,
+        isPaid: lesson.isPaid,
+        order: lesson.order,
         levelId: getLevelId(levelSlug),
       },
     });
