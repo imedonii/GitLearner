@@ -67,7 +67,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={firaCode.variable}>
+    <html lang="en" className={`${firaCode.variable} bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 bg-fixed`}>
       <body>
         <ClientProviders>{children}</ClientProviders>
       </body>
