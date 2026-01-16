@@ -57,21 +57,24 @@ export const LearningPath = () => {
     }
   }, [lessons, currentLessonId])
 
-  const unlockAchievement = useCallback((achievementId: string) => {
-    const achievement = achievements?.find((a) => a.id === achievementId)
-    if (achievement && !achievement.unlocked) {
-      const updatedAchievements = achievements?.map((a) =>
-        a.id === achievementId ? { ...a, unlocked: true } : a
-      )
-      setAchievements?.(updatedAchievements || [])
-      setNewlyUnlockedAchievement({ ...achievement, unlocked: true })
+  const unlockAchievement = useCallback(
+    (achievementId: string) => {
+      const achievement = achievements?.find((a) => a.id === achievementId)
+      if (achievement && !achievement.unlocked) {
+        const updatedAchievements = achievements?.map((a) =>
+          a.id === achievementId ? { ...a, unlocked: true } : a
+        )
+        setAchievements?.(updatedAchievements || [])
+        setNewlyUnlockedAchievement({ ...achievement, unlocked: true })
 
-      // Clear the toast after animation
-      setTimeout(() => {
-        setNewlyUnlockedAchievement(null)
-      }, 5000)
-    }
-  }, [achievements])
+        // Clear the toast after animation
+        setTimeout(() => {
+          setNewlyUnlockedAchievement(null)
+        }, 5000)
+      }
+    },
+    [achievements]
+  )
 
   // Check for completing all lessons
   useEffect(() => {
@@ -280,13 +283,13 @@ export const LearningPath = () => {
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 p-4">
+          <div className="flex-1 p-4 max-h-[80vh]">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Left: Terminal */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="flex flex-col"
+                className="flex flex-col h-[80vh]"
               >
                 <Terminal
                   onCommand={handleCommand}

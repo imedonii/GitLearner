@@ -126,7 +126,7 @@ export default function Terminal({
       {/* Terminal Content */}
       <div
         ref={outputRef}
-        className="flex-1 p-4 overflow-y-auto font-mono text-sm scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900"
+        className="flex-1 p-4 overflow-y-auto font-mono text-sm scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900 flex flex-col min-h-0"
       >
         {history.map((line, index) => (
           <motion.div
