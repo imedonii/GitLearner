@@ -23,7 +23,7 @@ import { useRouter } from 'next/navigation'
 export const LearningPath = () => {
   const { user } = useUser()
   const router = useRouter()
-  const { lessons, isLoading, isError, updateLesson, isUpdating } = useLessons()
+  const { lessons, isLoading, isError, updateLesson, completeLesson, isUpdating } = useLessons()
   const [currentLessonId, setCurrentLessonId] = useState<string | null>(null)
   const [gitState, setGitState] = useState<GitState>(initialGitState)
   const [showPushAnimation, setShowPushAnimation] = useState(false)
@@ -53,7 +53,14 @@ export const LearningPath = () => {
   // Set current lesson ID on initial load or when lessons change
   useEffect(() => {
     if (lessons && lessons.length > 0 && !currentLessonId) {
-      setCurrentLessonId(lessons[0].id)
+      // Find the first incomplete lesson
+      const firstIncomplete = lessons.find(l => !l.completed)
+      if (firstIncomplete) {
+        setCurrentLessonId(firstIncomplete.id)
+      } else {
+        // All completed, go to first
+        setCurrentLessonId(lessons[0].id)
+      }
     }
   }, [lessons, currentLessonId])
 
@@ -108,6 +115,28 @@ export const LearningPath = () => {
       })
     : []
 
+  // Build completion map from lessons
+  const lessonCompletionMap = lessons?.reduce((map, lesson) => {
+    const example = lesson.exampleCommand
+    if (!example) return map
+
+    // Split by lines and take first line
+    const firstLine = example.split('\n')[0]
+
+    // Split by ' or ' to handle alternatives
+    const commands = firstLine.split(' or ').map(cmd => cmd.trim())
+
+    commands.forEach(cmd => {
+      // Remove quotes and extra parts for the key
+      const cleanCmd = cmd.split(' ')[0] + ' ' + cmd.split(' ')[1] // e.g., 'git help', 'git --version'
+      if (cleanCmd.includes('git')) {
+        map[cleanCmd] = lesson.slug
+      }
+    })
+
+    return map
+  }, {} as Record<string, string>) || {}
+
   const handleCommand = (command: string) => {
     const result = executeGitCommand(command, gitState)
 
@@ -123,10 +152,13 @@ export const LearningPath = () => {
         setShowPullAnimation(true)
         setTimeout(() => setShowPullAnimation(false), 2000)
       }
+    }
 
-      // Auto-complete certain lessons based on actions
-      if (result.type === 'success') {
-        autoCompleteLesson(command)
+    // Auto-complete certain lessons based on actions
+    const shouldCompleteLesson = result.type === 'success' || Object.keys(lessonCompletionMap).some(cmd => command.startsWith(cmd))
+    if (shouldCompleteLesson) {
+      autoCompleteLesson(command)
+      if (result.newState) {
         checkAchievements(command, result.newState)
       }
     }
@@ -168,27 +200,21 @@ export const LearningPath = () => {
     }
   }
 
-  const autoCompleteLesson = (command: string) => {
+  const autoCompleteLesson = async (command: string) => {
     if (!lessons || !currentLessonId) return
-
-    const lessonCompletionMap: Record<string, string> = {
-      'git init': 'init',
-      'git status': 'status',
-      'git add': 'add',
-      'git commit': 'commit',
-      'git log': 'log',
-      'git branch': 'branch',
-      'git checkout': 'checkout',
-      'git push': 'push',
-      'git pull': 'pull',
-      'git clone': 'clone',
-    }
 
     const activeLesson = lessons.find((l) => l.id === currentLessonId)
 
+    if (!activeLesson) return
+
     for (const [cmd, slug] of Object.entries(lessonCompletionMap)) {
-      if (command.startsWith(cmd) && activeLesson?.slug === slug) {
-        handleCompleteLesson()
+      if (command.startsWith(cmd) && activeLesson.slug === slug && !activeLesson.completed) {
+        try {
+          await completeLesson(currentLessonId, activeLesson.levelId)
+          handleCompleteLesson()
+        } catch (error) {
+          console.error('Error completing lesson:', error)
+        }
         break
       }
     }
@@ -206,10 +232,8 @@ export const LearningPath = () => {
       const currentIndex = lessons.findIndex((l) => l.id === currentLessonId)
       if (currentIndex < lessons.length - 1) {
         const nextLesson = lessons[currentIndex + 1]
-        // Only advance if the next lesson is not locked
-        if (!nextLesson.locked) {
-          setCurrentLessonId(nextLesson.id)
-        }
+        // Advance to next lesson (it should be unlocked now)
+        setCurrentLessonId(nextLesson.id)
       }
     }, 1500)
   }
@@ -272,7 +296,7 @@ export const LearningPath = () => {
           {/* Lesson Panel */}
           <div className="p-4 border-b border-slate-700 bg-slate-900">
             <LessonPanel
-              showCompleteButton={true}
+              showCompleteButton={false}
               lesson={currentLesson ?? undefined}
               onComplete={handleCompleteLesson}
               updateLesson={updateLesson}

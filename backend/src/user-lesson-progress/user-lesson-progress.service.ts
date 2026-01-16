@@ -73,4 +73,39 @@ export class UserLessonProgressService {
       },
     });
   }
+
+  /**
+   * Mark a lesson as completed by lesson ID (creates or updates progress record)
+   */
+  async markLessonComplete(userId: string, lessonId: string, levelId: string) {
+    const existingProgress = await this.prisma.userLeasonProgress.findUnique({
+      where: {
+        userId_leasonId: {
+          userId,
+          leasonId: lessonId,
+        },
+      },
+    });
+
+    if (existingProgress) {
+      return this.prisma.userLeasonProgress.update({
+        where: { id: existingProgress.id },
+        data: {
+          isCompleted: true,
+          completedAt: new Date(),
+          levelId,
+        },
+      });
+    }
+
+    return this.prisma.userLeasonProgress.create({
+      data: {
+        userId,
+        leasonId: lessonId,
+        levelId,
+        isCompleted: true,
+        completedAt: new Date(),
+      },
+    });
+  }
 }

@@ -29,6 +29,7 @@ interface UseLessonsReturn {
     data: Omit<Lesson, 'id' | 'createdAt' | 'updatedAt'>
   ) => Promise<Lesson>
   updateLesson: (id: string, data: Partial<Lesson>) => Promise<Lesson>
+  completeLesson: (lessonId: string, levelId: string) => Promise<void>
   deleteLesson: (id: string) => Promise<void>
   isCreating: boolean
   isUpdating: boolean
@@ -166,6 +167,17 @@ export function useLessons(lessonId?: string): UseLessonsReturn {
     },
   })
 
+  // Complete lesson mutation
+  const { mutateAsync: complete } = useMutation<void, Error, { lessonId: string; levelId: string }>({
+    mutationFn: async ({ lessonId, levelId }) => {
+      const response = await axiosInstance.post(`user-lesson-progress/complete/${lessonId}`, { levelId })
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY.lessons] })
+    },
+  })
+
   return {
     lessons,
     lesson,
@@ -175,6 +187,8 @@ export function useLessons(lessonId?: string): UseLessonsReturn {
     createLesson: create,
     updateLesson: (id: string, data: Partial<Lesson>) =>
       update({ id, ...data }),
+    completeLesson: (lessonId: string, levelId: string) =>
+      complete({ lessonId, levelId }),
     deleteLesson: deleteLesson,
     isCreating,
     isUpdating,

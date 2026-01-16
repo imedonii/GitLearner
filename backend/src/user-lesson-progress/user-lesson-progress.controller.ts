@@ -59,4 +59,13 @@ export class UserLessonProgressController {
   update(@Param('id') id: string, @Body() dto: UpdateUserLessonProgressDto) {
     return this.userLessonProgressService.update(id, dto);
   }
+
+  /**
+   * ✅ Complete a lesson by lesson ID
+   */
+  @Post('complete/:lessonId')
+  async completeLesson(@Req() req: Request, @Param('lessonId') lessonId: string, @Body() body: { levelId: string }) {
+    const userId = (req as any).user?.id;
+    return this.userLessonProgressService.markLessonComplete(userId, lessonId, body.levelId);
+  }
 }
