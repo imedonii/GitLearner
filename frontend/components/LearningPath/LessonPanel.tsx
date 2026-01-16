@@ -112,14 +112,34 @@ export default function LessonPanel({
       className={`bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg border border-slate-700 p-6 shadow-lg ${className}`}
     >
       <div className="flex items-start justify-between mb-4">
-        <div className="flex items-start gap-3">
-          <BookOpen className="w-6 h-6 text-emerald-400 mt-1 flex-shrink-0" />
-          <div>
-            <h2 className="text-2xl font-bold text-white mb-1">
-              {lesson.title}
-            </h2>
-            <p className="text-slate-300">{lesson.description}</p>
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-3">
+            <BookOpen className="w-6 h-6 text-emerald-400 mt-1 flex-shrink-0" />
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-1">
+                {lesson.title}
+              </h2>
+              <p className="text-slate-300">{lesson.description}</p>
+            </div>
           </div>
+
+          {/* Complete Button */}
+          {showCompleteButton && onComplete && !lesson.completed && (
+            <Button
+              onClick={handleComplete}
+              className="w-1/6 bg-emerald-500 hover:bg-emerald-600"
+              disabled={isCompleting || isUpdating}
+            >
+              {isCompleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Marking as Complete...
+                </>
+              ) : (
+                'Mark as Complete'
+              )}
+            </Button>
+          )}
         </div>
         {lesson.completed && (
           <motion.div
@@ -209,24 +229,6 @@ export default function LessonPanel({
               </div>
             </div>
           </motion.div>
-        )}
-
-        {/* Complete Button */}
-        {showCompleteButton && onComplete && !lesson.completed && (
-          <Button
-            onClick={handleComplete}
-            className="w-full bg-emerald-500 hover:bg-emerald-600"
-            disabled={isCompleting || isUpdating}
-          >
-            {isCompleting ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Marking as Complete...
-              </>
-            ) : (
-              'Mark as Complete'
-            )}
-          </Button>
         )}
       </div>
     </motion.div>
