@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { QUERY_KEY } from '../queryKeys'
 import { axiosInstance } from '@/api'
-import Cookies from 'js-cookie'
 
 export interface UserLevel {
   id: string
@@ -39,7 +38,7 @@ async function getUser(): Promise<User | null> {
       withCredentials: true,
     })
     return response.data.user
-  } catch (error) {
+  } catch {
     return null
   }
 }

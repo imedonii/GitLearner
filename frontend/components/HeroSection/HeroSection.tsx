@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { GitBranch, Play, Terminal } from 'lucide-react'
+import { Play, Terminal } from 'lucide-react'
 import { Button } from '@/components/UI/button'
 import { useRouter } from 'next/navigation'
 
@@ -97,7 +97,7 @@ export const HeroSection = () => {
               </div>
               <div className="text-emerald-400 mb-2">$ git add .</div>
               <div className="text-emerald-400 mb-2">
-                $ git commit -m "Initial commit"
+                $ git commit -m &quot;Initial commit&quot;
               </div>
               <div className="text-slate-300">
                 [main <span className="text-yellow-400">a3f5b2c</span>] Initial

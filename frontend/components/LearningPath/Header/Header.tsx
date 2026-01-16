@@ -32,8 +32,6 @@ export const Header = ({
     return null
   }
 
-  const nextMilestone = getNextMilestone()
-
   const levelConfig = {
     beginner: {
       icon: Sparkles,
@@ -65,7 +63,6 @@ export const Header = ({
   const Icon = config.icon
 
   const userLevelKey = levelSlugToKey(user?.level?.slug)
-  const currentLevel = levelConfig[userLevelKey]
 
   const onLogout = () => {
     logout()

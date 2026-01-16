@@ -212,13 +212,7 @@ function FilterButton({
   label: string
   color?: string
 }) {
-  const colorClass = color
-    ? active
-      ? `bg-${color}-500/20 border-${color}-500/50 text-${color}-400`
-      : `border-slate-700 text-slate-400 hover:bg-slate-800`
-    : active
-    ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400'
-    : 'border-slate-700 text-slate-400 hover:bg-slate-800'
+
 
   return (
     <button

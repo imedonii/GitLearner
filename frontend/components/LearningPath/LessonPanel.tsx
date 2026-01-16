@@ -21,7 +21,6 @@ type Lesson = ApiLesson & {
 }
 
 interface LessonPanelProps {
-  lessonId?: string
   lesson?: Lesson
   onComplete?: () => void
   showCompleteButton?: boolean
@@ -34,7 +33,6 @@ interface LessonPanelProps {
 
 export default function LessonPanel({
   lesson: initialLesson,
-  lessonId,
   onComplete,
   showCompleteButton = false,
   className = '',

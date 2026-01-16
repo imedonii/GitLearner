@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLayoutEffect } from 'react'
 import { Save, X } from 'lucide-react'
 import { FileNode } from '../../utils/FileSystemSimulator/fileSystemSimulator'
 import { Button } from '../UI/button'
@@ -16,7 +17,7 @@ export default function FileEditorPanel({
 }: FileEditorPanelProps) {
   const [content, setContent] = useState('')
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (file) {
       setContent(file.content)
     }

@@ -66,7 +66,7 @@ export function useSignUp(): {
       router.push(`/auth/email-verification?email=${encodeURIComponent(variables.email)}`)
     },
     onError: () => {
-      error
+      // Handle error if needed
     },
   })
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import {
   AchievementToast,
@@ -60,6 +60,22 @@ export const LearningPath = () => {
     }
   }, [lessons, currentLessonId])
 
+  const unlockAchievement = useCallback((achievementId: string) => {
+    const achievement = achievements?.find((a) => a.id === achievementId)
+    if (achievement && !achievement.unlocked) {
+      const updatedAchievements = achievements?.map((a) =>
+        a.id === achievementId ? { ...a, unlocked: true } : a
+      )
+      setAchievements?.(updatedAchievements || [])
+      setNewlyUnlockedAchievement({ ...achievement, unlocked: true })
+
+      // Clear the toast after animation
+      setTimeout(() => {
+        setNewlyUnlockedAchievement(null)
+      }, 5000)
+    }
+  }, [achievements])
+
   // Check for completing all lessons
   useEffect(() => {
     if (
@@ -69,7 +85,7 @@ export const LearningPath = () => {
     ) {
       unlockAchievement('complete-all')
     }
-  }, [completedLessons, lessons])
+  }, [completedLessons, lessons, unlockAchievement])
 
   const currentLesson =
     lessons && currentLessonId
@@ -116,22 +132,6 @@ export const LearningPath = () => {
     }
 
     return result
-  }
-
-  const unlockAchievement = (achievementId: string) => {
-    const achievement = achievements?.find((a) => a.id === achievementId)
-    if (achievement && !achievement.unlocked) {
-      const updatedAchievements = achievements?.map((a) =>
-        a.id === achievementId ? { ...a, unlocked: true } : a
-      )
-      setAchievements?.(updatedAchievements || [])
-      setNewlyUnlockedAchievement({ ...achievement, unlocked: true })
-
-      // Clear the toast after animation
-      setTimeout(() => {
-        setNewlyUnlockedAchievement(null)
-      }, 5000)
-    }
   }
 
   const checkAchievements = (command: string, newState: GitState) => {
@@ -226,8 +226,6 @@ export const LearningPath = () => {
   const showTwoComputer = ['push', 'pull', 'clone'].includes(
     currentLesson?.slug ?? ''
   )
-
-  const unlockedCount = achievements?.filter((a) => a.unlocked).length || 0
 
   if (isLoading)
     return (

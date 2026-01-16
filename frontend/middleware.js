@@ -1,46 +1,32 @@
 // middleware.ts
 import { NextResponse } from 'next/server'
-import { jwtVerify } from 'jose'
-
-const secret = new TextEncoder().encode(
-    process.env.NEXT_PUBLIC_JWT_SECRET
-)
 
 export async function middleware(request) {
     const path = request.nextUrl.pathname
-    const token = request.cookies.get('token')?.value
+
+    console.log('Middleware running for:', path)
+
+    // 🔓 Public routes
+    const publicPages = ['/', '/playground', '/help']
+    const isPublicPage = publicPages.some(p => path.startsWith(p))
 
     const authPages = ['/auth/signin', '/auth/signup']
     const isAuthPage = authPages.some(p => path.startsWith(p))
 
-    // 🔓 Public routes
-    if (path === '/' || isAuthPage) {
-        if (token && isAuthPage) {
-            return NextResponse.redirect(new URL('/learning-path', request.url))
-        }
+    console.log('path:', path, 'isPublicPage:', isPublicPage, 'isAuthPage:', isAuthPage)
+
+    if (isPublicPage || isAuthPage) {
+        console.log('Allowing public/auth page access')
         return NextResponse.next()
     }
 
-    // 🔒 Protected routes
-    if (!token) {
-        return redirectToSignin(request)
-    }
-
-    try {
-        await jwtVerify(token, secret) // ✅ validates exp automatically
-        return NextResponse.next()
-    } catch {
-        // ❌ Token expired or invalid → remove cookie
-        const res = redirectToSignin(request)
-        res.cookies.delete('token')
-        return res
-    }
-}
-
-function redirectToSignin(request) {
+    // 🔒 Protected routes - redirect to signin
+    console.log('Protected route - redirecting to signin')
     return NextResponse.redirect(new URL('/auth/signin', request.url))
 }
 
+
+
 export const config = {
-    matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+    matcher: ['/:path*'],
 }

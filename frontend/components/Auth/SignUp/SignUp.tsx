@@ -11,7 +11,7 @@ import {
   Loader2,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useSignUp } from '@/hooks/Auth/useSignUp'
 
 export const SignUp = () => {
@@ -32,11 +32,7 @@ export const SignUp = () => {
 
   const strength = passwordStrength(password)
 
-  useEffect(() => {
-    if (signUpError) {
-      setError(signUpError.message || 'An error occurred during sign up')
-    }
-  }, [signUpError])
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

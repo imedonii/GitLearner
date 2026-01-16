@@ -49,7 +49,7 @@ export default function GitGraph({ gitState }: GitGraphProps) {
           <p className="mb-2">Try these commands:</p>
           <code className="block text-emerald-400">git add .</code>
           <code className="block text-emerald-400 mt-1">
-            git commit -m "Initial commit"
+            git commit -m &quot;Initial commit&quot;
           </code>
         </div>
       </div>

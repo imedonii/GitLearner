@@ -234,7 +234,7 @@ See 'git --help' for more information.`,
     }
 
     const filePattern = parts[2]
-    let newState = { ...state }
+    const newState = { ...state }
 
     if (
       filePattern === '.' ||

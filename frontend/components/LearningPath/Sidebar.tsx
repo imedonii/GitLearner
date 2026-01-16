@@ -239,7 +239,7 @@ export default function Sidebar({
                       transition={{ duration: 0.2 }}
                       className="space-y-1 pl-2"
                     >
-                      {group.lessons.map((lesson, index) => {
+                      {group.lessons.map((lesson) => {
                         const isLocked =
                           lesson.locked && userLevel === 'beginner'
                         const isCurrent = currentLessonId === lesson.id

@@ -4,18 +4,11 @@ import { motion } from 'framer-motion'
 import { AlertCircle, Home, Code } from 'lucide-react'
 import { Button } from '@/components/UI/button'
 import { useRouter, usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+
 
 const NotFound = () => {
   const router = useRouter()
   const pathname = usePathname()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) return null
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
@@ -51,10 +44,10 @@ const NotFound = () => {
           transition={{ delay: 0.4 }}
         >
           <h2 className="text-3xl font-bold text-white mb-4">
-            Oops! This page doesn't exist.
+            Oops! This page doesn&apos;t exist.
           </h2>
           <p className="text-slate-400 mb-8">
-            The page you're looking for could not be found. It might have been
+            The page you&apos;re looking for could not be found. It might have been
             removed, renamed, or did not exist in the first place.
           </p>
         </motion.div>
@@ -94,7 +87,7 @@ const NotFound = () => {
             $ git checkout {pathname || 'page'}
             <br />
             <span className="text-red-400">
-              error: pathspec '{pathname || 'page'}' did not match any file(s)
+              error: pathspec &apos;{pathname || 'page'}&apos; did not match any file(s)
               known to git
             </span>
           </code>

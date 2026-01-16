@@ -200,7 +200,7 @@ export default function KnowledgeLevelPage({
 
         {/* Help Text */}
         <p className="text-center text-sm text-slate-500 mt-6">
-          Don't worry, you can change this later in settings
+          Don&apos;t worry, you can change this later in settings
         </p>
       </motion.div>
     </div>

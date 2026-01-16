@@ -64,3 +64,43 @@ model UserLeasonProgress {
 
   @@unique([userId, leasonId])
 }
+
+model GitCommandCategory {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  label       String
+  icon        String
+  commands    GitCommand[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model GitCommand {
+  id          String             @id @default(uuid())
+  name        String             @unique
+  syntax      String
+  description String
+  whenToUse   String
+  example     String
+  categoryId  String
+  category    GitCommandCategory @relation(fields: [categoryId], references: [id])
+  isCommon    Boolean            @default(false)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+}
+
+model Tip {
+  id          String   @id @default(uuid())
+  type        TipType
+  title       String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum TipType {
+  warning
+  pro
+  do
+  dont
+}

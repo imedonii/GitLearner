@@ -217,7 +217,7 @@ export default function LoadingPage() {
               transition={{ delay: 1.8 }}
               className="text-purple-400"
             >
-              $ git commit -m "Ready to learn!"
+              $ git commit -m &quot;Ready to learn!&quot;
             </motion.div>
           </div>
         </motion.div>

@@ -1,5 +1,3 @@
-import { motion } from 'framer-motion'
-
 type LevelCardProp = {
   level: string
   color: string

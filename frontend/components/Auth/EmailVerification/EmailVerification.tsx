@@ -284,7 +284,7 @@ export const EmailVerification = () => {
             {/* Resend Code */}
             <div className="mt-6 text-center">
               <p className="text-sm text-slate-400 mb-2">
-                Didn't receive the code?
+                Didn&apos;t receive the code?
               </p>
               {canResend ? (
                 <button
@@ -305,7 +305,7 @@ export const EmailVerification = () => {
 
         {/* Help Text */}
         <p className="text-center text-xs text-slate-500 mt-6">
-          Check your spam folder if you don't see the userEmail
+          Check your spam folder if you don&apos;t see the userEmail
         </p>
       </motion.div>
     </div>

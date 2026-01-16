@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useLayoutEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -19,17 +19,12 @@ import {
   Save,
 } from 'lucide-react'
 import { useUpdateProfile, useUserProgress } from '@/hooks/Auth/useUpdateProfile'
+import { User as UserType } from '@/hooks/Auth/useUser'
 
 interface ProfileSettingsModalProps {
   isOpen: boolean
   onClose: () => void
-  user: {
-    firstName: string
-    lastName: string
-    email: string
-    level: string
-  }
-  onChangeLevel: (level: string) => void
+  user: UserType
 }
 
 const levelConfig = {
@@ -42,7 +37,6 @@ export default function ProfileSettingsModal({
   isOpen,
   onClose,
   user,
-  onChangeLevel,
 }: ProfileSettingsModalProps) {
   const [activeTab, setActiveTab] = useState<'profile' | 'password' | 'progress'>('profile')
   
@@ -64,7 +58,7 @@ export default function ProfileSettingsModal({
   const { progress, isLoading: isLoadingProgress } = useUserProgress()
 
   // Reset form when modal opens
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isOpen) {
       setFirstName(user.firstName)
       setLastName(user.lastName)
@@ -88,10 +82,10 @@ export default function ProfileSettingsModal({
         email: email !== user.email ? email : undefined,
       })
       setProfileMessage({ type: 'success', text: 'Profile updated successfully!' })
-    } catch (error: any) {
-      setProfileMessage({ 
-        type: 'error', 
-        text: error?.response?.data?.message || 'Failed to update profile' 
+    } catch (error: unknown) {
+      setProfileMessage({
+        type: 'error',
+        text: (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to update profile'
       })
     }
   }
@@ -119,10 +113,10 @@ export default function ProfileSettingsModal({
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
-    } catch (error: any) {
-      setPasswordMessage({ 
-        type: 'error', 
-        text: error?.response?.data?.message || 'Failed to change password' 
+    } catch (error: unknown) {
+      setPasswordMessage({
+        type: 'error',
+        text: (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to change password'
       })
     }
   }
@@ -133,13 +127,13 @@ export default function ProfileSettingsModal({
   // State for portal mounting
   const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setMounted(true)
     return () => setMounted(false)
   }, [])
 
   // Prevent body scroll when modal is open
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
     } else {

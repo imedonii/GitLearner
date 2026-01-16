@@ -80,7 +80,7 @@ export const LevelBadge = ({
               {!nextMilestone && (
                 <div className="text-xs text-green-400 flex items-center gap-1">
                   <Rocket className="w-3 h-3" />
-                  You've mastered Git!
+                  You&apos;ve mastered Git!
                 </div>
               )}
             </div>

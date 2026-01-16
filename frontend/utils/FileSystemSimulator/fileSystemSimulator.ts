@@ -30,7 +30,7 @@ export function executeShellCommand(
   const args = parts.slice(1)
 
   let output = ''
-  let newFileSystem = { ...fileSystem }
+  const newFileSystem = { ...fileSystem }
 
   switch (cmd) {
     case 'pwd':

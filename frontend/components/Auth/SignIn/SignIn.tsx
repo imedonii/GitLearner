@@ -2,16 +2,32 @@
 
 import { motion } from 'framer-motion'
 import { GitBranch, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSignIn } from '@/hooks/Auth/useSignIn'
+import { useUser } from '@/hooks/Auth/useUser'
 
 export const SignIn = () => {
   const router = useRouter()
+  const { user, isLoading } = useUser()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const { signInMutation, isPending, error: signInError } = useSignIn()
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.push('/learning-path')
+    }
+  }, [user, isLoading, router])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
+      </div>
+    )
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -77,8 +93,8 @@ export const SignIn = () => {
                 className="mb-6 p-3 bg-red-500/10 border border-red-500/30 text-red-300 rounded-lg flex items-center gap-2 text-sm"
               >
                 <AlertCircle className="w-4 h-4" />
-                {error ||
-                  (signInError as any)?.response?.data?.message ||
+                  {error ||
+                  (signInError as unknown as { response?: { data?: { message?: string } } })?.response?.data?.message ||
                   'An error occurred'}
               </motion.div>
             ))}
