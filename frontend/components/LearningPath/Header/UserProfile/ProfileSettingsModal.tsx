@@ -19,7 +19,7 @@ import {
   Save,
 } from 'lucide-react'
 import { useUpdateProfile, useUserProgress } from '@/hooks/Auth/useUpdateProfile'
-import { User as UserType } from '@/hooks/Auth/useUser'
+import { User as UserType, levelSlugToKey } from '@/hooks/Auth/useUser'
 
 interface ProfileSettingsModalProps {
   isOpen: boolean
@@ -121,7 +121,8 @@ export default function ProfileSettingsModal({
     }
   }
 
-  const currentLevel = levelConfig[user.level as keyof typeof levelConfig]
+  const currentLevelKey = levelSlugToKey(user.level?.slug)
+  const currentLevel = levelConfig[currentLevelKey]
   const CurrentLevelIcon = currentLevel?.icon || Sparkles
 
   // State for portal mounting
@@ -276,20 +277,10 @@ export default function ProfileSettingsModal({
                     <label className="block text-sm font-medium text-slate-300 mb-2">
                       Current Level
                     </label>
-                    <div className={`flex items-center gap-3 p-3 rounded-lg border-2 ${currentLevel?.bgColor} border-slate-700`}>
-                      <CurrentLevelIcon className={`w-5 h-5 ${currentLevel?.color}`} />
-                      <span className="text-white font-medium">{currentLevel?.label || 'Unknown'}</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          onClose()
-                          // The parent component handles showing the level change modal
-                        }}
-                        className="ml-auto text-xs text-emerald-400 hover:text-emerald-300 underline"
-                      >
-                        Change Level
-                      </button>
-                    </div>
+                     <div className={`flex items-center gap-3 p-3 rounded-lg border-2 ${currentLevel?.bgColor} border-slate-700`}>
+                       <CurrentLevelIcon className={`w-5 h-5 ${currentLevel?.color}`} />
+                       <span className="text-white font-medium">{currentLevel?.label || 'Unknown'}</span>
+                     </div>
                   </div>
 
                   {/* Message */}
