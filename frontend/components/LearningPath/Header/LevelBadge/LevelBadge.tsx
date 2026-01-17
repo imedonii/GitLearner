@@ -16,8 +16,10 @@ export const LevelBadge = ({
   const [showLevelTooltip, setShowLevelTooltip] = useState<boolean>(false)
 
   const getNextMilestone = () => {
-    if (progressPercentage < 50) {
-      return { level: 'I Know Things', progress: 50 }
+    if (progressPercentage < 25) {
+      return { level: 'Beginner', progress: 25 }
+    } else if (progressPercentage < 75) {
+      return { level: 'I Know Things', progress: 75 }
     } else if (progressPercentage < 100) {
       return { level: 'Pro', progress: 100 }
     }

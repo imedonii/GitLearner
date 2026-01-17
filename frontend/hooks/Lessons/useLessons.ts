@@ -12,7 +12,11 @@ export interface Lesson {
   hint: string
   objective: string
   levelId: string
+  level: {
+    slug: string
+  }
   order: number
+  category?: string | null
   completionPattern?: string
   createdAt: string
   updatedAt: string

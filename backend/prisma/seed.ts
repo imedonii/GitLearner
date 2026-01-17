@@ -33,6 +33,7 @@ const prisma = new PrismaClient({
 async function main() {
   // 1️⃣ Seed Levels
   const levelsData = [
+    { name: 'Newbie', slug: 'newbie' },
     { name: 'New here', slug: 'new_here' },
     { name: 'I know things', slug: 'i_know_things' },
     { name: 'Pro', slug: 'pro_level' },
@@ -57,25 +58,30 @@ async function main() {
 
   // 3️⃣ Seed Leasons from lessons array
   for (const lesson of lessons) {
-    // All lessons are assigned to 'new_here' level
-    const levelSlug = 'new_here';
+    // Assign newbie lessons to 'newbie' level, others to 'new_here'
+    const levelSlug = lesson.order <= 6 ? 'newbie' : 'new_here';
 
-     await prisma.leasons.upsert({
-       where: { slug: lesson.id }, // use your `slug` column
-       update: {},
-       create: {
-         slug: lesson.id,
-         title: lesson.title,
-         description: lesson.description,
-         explanation: lesson.explanation,
-         exampleCommand: lesson.exampleCommand,
-         hint: lesson.hint,
-         objective: lesson.objective,
-         completionPattern: completionPatterns[lesson.id] || null,
-         isPaid: lesson.isPaid,
-         order: lesson.order,
-         levelId: getLevelId(levelSlug),
-       },
+      await prisma.leasons.upsert({
+        where: { slug: lesson.id }, // use your `slug` column
+        update: {
+          levelId: getLevelId(levelSlug),
+          category: lesson.category,
+          order: lesson.order,
+        },
+        create: {
+          slug: lesson.id,
+          title: lesson.title,
+          description: lesson.description,
+          explanation: lesson.explanation,
+          exampleCommand: lesson.exampleCommand,
+          hint: lesson.hint,
+          objective: lesson.objective,
+          completionPattern: completionPatterns[lesson.id] || null,
+          isPaid: lesson.isPaid,
+          order: lesson.order,
+          category: lesson.category,
+          levelId: getLevelId(levelSlug),
+        },
      });
   }
 

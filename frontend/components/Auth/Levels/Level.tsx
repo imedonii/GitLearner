@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useUser } from '@/hooks/Auth/useUser'
 import AppTooltip from '@/components/UI/AppTooltip'
 
-export type KnowledgeLevel = 'beginner' | 'intermediate' | 'pro'
+export type KnowledgeLevel = 'newbie' | 'beginner' | 'mid' | 'pro'
 
 interface LevelCard {
   id: KnowledgeLevel
@@ -23,6 +23,23 @@ interface LevelCard {
 }
 
 const levels: LevelCard[] = [
+  {
+    id: 'newbie',
+    icon: GitBranch,
+    title: 'Newbie',
+    subtitle: "I'm completely new to Git",
+    description: 'Learn the basics and concepts before diving in',
+    features: [
+      'Conceptual understanding',
+      'No coding required',
+      'Build strong foundation',
+      'Pure explanations',
+    ],
+    color: 'from-blue-500 to-cyan-500',
+    iconColor: 'text-blue-400',
+    borderColor: 'border-blue-500/50',
+    slug: 'newbie',
+  },
   {
     id: 'beginner',
     icon: Sparkles,
@@ -41,7 +58,7 @@ const levels: LevelCard[] = [
     slug: 'new_here',
   },
   {
-    id: 'intermediate',
+    id: 'mid',
     icon: Zap,
     title: 'I Know Things',
     subtitle: "I've used Git but want to improve",
@@ -86,7 +103,7 @@ export const Level = () => {
     useState<KnowledgeLevel | null>(null)
 
   const isLevelLocked = (levelId: KnowledgeLevel) => {
-    return !user?.subscribed && levelId !== 'beginner'
+    return !user?.subscribed && levelId !== 'newbie' && levelId !== 'beginner'
   }
 
   const handleContinue = async () => {

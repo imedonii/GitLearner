@@ -41,7 +41,7 @@ export const LearningPath = () => {
   const [achievements, setAchievements] = useState(initialAchievements)
 
   const currentLevel = levelSlugToKey(user?.level?.slug) || 'beginner'
-  const lessonsInCurrentLevel = lessons?.filter(l => levelSlugToKey(l.levelId) === currentLevel) || []
+  const lessonsInCurrentLevel = lessons?.filter(l => levelSlugToKey(l.level.slug) === currentLevel) || []
   const completedInCurrentLevel = lessonsInCurrentLevel.filter(l => l.completed).length
   const totalInCurrentLevel = lessonsInCurrentLevel.length
   const progressPercentage = totalInCurrentLevel > 0 ? (completedInCurrentLevel / totalInCurrentLevel) * 100 : 0
@@ -79,7 +79,7 @@ export const LearningPath = () => {
   // Update user level when current level is completed
   useEffect(() => {
     if (progressPercentage === 100 && currentLevel !== 'pro' && user) {
-      const nextLevelSlug = currentLevel === 'beginner' ? 'i_know_things' : 'pro_level'
+      const nextLevelSlug = currentLevel === 'newbie' ? 'new_here' : currentLevel === 'beginner' ? 'i_know_things' : 'pro_level'
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/set-level`, {
         method: 'POST',
         headers: {
@@ -93,7 +93,7 @@ export const LearningPath = () => {
           addNotification({
             type: 'success',
             title: 'Level Up!',
-            description: `Congratulations! You've advanced to ${nextLevelSlug === 'i_know_things' ? 'I Know Things' : 'Pro'} level.`,
+            description: `Congratulations! You've advanced to ${nextLevelSlug === 'new_here' ? 'Beginner' : nextLevelSlug === 'i_know_things' ? 'I Know Things' : 'Pro'} level.`,
           })
         })
         .catch(() => {
@@ -144,7 +144,7 @@ export const LearningPath = () => {
   // Map backend lessons to sidebar items with progress from backend
   const lessonItems = Array.isArray(lessons)
     ? lessons.map((lesson) => {
-        const level = levelSlugToKey(lesson.levelId) as 'beginner' | 'mid' | 'pro'
+        const level = levelSlugToKey(lesson.level.slug) as 'newbie' | 'beginner' | 'mid' | 'pro'
 
         return {
           id: lesson.id,
@@ -153,6 +153,8 @@ export const LearningPath = () => {
           locked: lesson.locked,
           level,
           description: lesson.description,
+          category: lesson.category,
+          order: lesson.order,
         }
       })
     : []
@@ -316,7 +318,7 @@ export const LearningPath = () => {
         onPlayground={onPlayground}
         onCheatSheet={onCheatSheet}
         onHelpAndTips={onHelpAndTips}
-        userLevel={levelSlugToKey(user?.level?.slug)}
+        userLevel={levelSlugToKey(user?.level?.slug) as 'newbie' | 'beginner' | 'mid' | 'pro'}
         subscribed={user?.subscribed ?? false}
       />
 
@@ -337,8 +339,19 @@ export const LearningPath = () => {
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 p-4 max-h-[80vh]">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {currentLevel === 'newbie' ? (
+            <div className="flex-1 p-4">
+              <div className="bg-slate-900 rounded-lg border border-slate-700 p-6 text-center">
+                <h2 className="text-xl font-bold text-white mb-4">Pure Explanations</h2>
+                <p className="text-slate-400">
+                  This level focuses on building conceptual understanding of Git.
+                  No interactive elements - just read and learn the fundamentals.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 p-4 max-h-[80vh]">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Left: Terminal */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
@@ -424,12 +437,13 @@ export const LearningPath = () => {
                     />
                   </div>
                 </div>
-              </motion.div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    </>
-  )
+               </motion.div>
+             </div>
+           </div>
+           )}
+         </div>
+       </div>
+     </div>
+     </>
+   )
 }

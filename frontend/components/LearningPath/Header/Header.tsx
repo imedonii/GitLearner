@@ -1,6 +1,6 @@
 'use client'
 
-import { Rocket, Sparkles, Zap, Trophy } from 'lucide-react'
+import { Rocket, Sparkles, Zap, Trophy, GitBranch } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useUser, levelSlugToKey } from '@/hooks/Auth/useUser'
 import { useLogout } from '@/hooks/Auth/useLogout'
@@ -18,7 +18,7 @@ export const Header = ({
   onShowAchievements,
   achievementsCount = { unlocked: 0, total: 6 },
   progressPercentage = 0,
-  gitLevel = 'beginner',
+  gitLevel = 'newbie',
 }: HeaderProps) => {
   const { user } = useUser()
   const { logout } = useLogout()
@@ -33,6 +33,15 @@ export const Header = ({
   }
 
   const levelConfig = {
+    newbie: {
+      icon: GitBranch,
+      label: 'Newbie',
+      color: 'from-blue-500 to-cyan-500',
+      textColor: 'text-blue-400',
+      bgColor: 'bg-blue-500/10',
+      borderColor: 'border-blue-500/50',
+      progressColor: 'from-blue-400 to-cyan-400',
+    },
     beginner: {
       icon: Sparkles,
       label: 'Beginner',

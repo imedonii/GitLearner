@@ -11,7 +11,7 @@ interface Lesson {
   practiceTask?: string
 }
 
-export type LessonLevel = 'beginner' | 'mid' | 'pro'
+export type LessonLevel = 'newbie' | 'beginner' | 'mid' | 'pro'
 
 export const lessons: Lesson[] = [
   // ============================================

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { GitBranch, Sparkles, Zap, Rocket, Lock, Check } from 'lucide-react'
 
-export type KnowledgeLevel = 'beginner' | 'mid' | 'pro'
+export type KnowledgeLevel = 'newbie' | 'beginner' | 'mid' | 'pro'
 
 interface KnowledgeLevelPageProps {
   onSelectLevel: (level: KnowledgeLevel) => void
@@ -21,6 +21,22 @@ interface LevelCard {
 }
 
 const levels: LevelCard[] = [
+  {
+    id: 'newbie',
+    icon: GitBranch,
+    title: 'Newbie',
+    subtitle: "I'm completely new to Git",
+    description: 'Learn the basics and concepts before diving in',
+    features: [
+      'Conceptual understanding',
+      'No coding required',
+      'Build strong foundation',
+      'Pure explanations',
+    ],
+    color: 'from-blue-500 to-cyan-500',
+    iconColor: 'text-blue-400',
+    borderColor: 'border-blue-500/50',
+  },
   {
     id: 'beginner',
     icon: Sparkles,
