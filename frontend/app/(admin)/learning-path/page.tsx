@@ -33,10 +33,7 @@ const LearningPathPage = () => {
   }
 
   return (
-    <>
-      <Header />
-      <LearningPath />
-    </>
+    <LearningPath />
   )
 }
 

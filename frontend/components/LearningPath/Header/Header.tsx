@@ -41,7 +41,7 @@ export const Header = ({
       bgColor: 'bg-green-500/10',
       borderColor: 'border-green-500/50',
     },
-    intermediate: {
+    mid: {
       icon: Zap,
       label: 'I Know Things',
       color: 'from-yellow-500 to-orange-500',

@@ -56,13 +56,13 @@ export const LevelBadge = ({
                     {progressPercentage.toFixed(0)}%
                   </span>
                 </div>
-                <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progressPercentage}%` }}
-                    className="h-full bg-gradient-to-r text-green-400"
-                  />
-                </div>
+                 <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
+                   <motion.div
+                     initial={{ width: 0 }}
+                     animate={{ width: `${progressPercentage}%` }}
+                     className="h-full bg-gradient-to-r from-green-400 to-blue-500"
+                   />
+                 </div>
               </div>
 
               {nextMilestone && (

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   AchievementToast,
   achievements as initialAchievements,
@@ -15,7 +16,9 @@ import Terminal from './Terminal'
 import LessonPanel from './LessonPanel'
 import { executeGitCommand, GitState, initialGitState } from '@/utils'
 import { useLessons } from '@/hooks/Lessons/useLessons'
+import { QUERY_KEY } from '@/hooks/queryKeys'
 import Sidebar from './Sidebar'
+import { Header } from './Header/Header'
 import type { KnowledgeLevel } from './KnowledgeLevelPage'
 import { useUser, levelSlugToKey } from '@/hooks/Auth/useUser'
 import { useRouter } from 'next/navigation'
@@ -24,6 +27,7 @@ import { useNotifications } from '@/components/UI/NotificationsProvider'
 export const LearningPath = () => {
   const { user } = useUser()
   const router = useRouter()
+  const queryClient = useQueryClient()
   const { lessons, isLoading, isError, updateLesson, completeLesson, isUpdating } = useLessons()
   const { addNotification } = useNotifications()
   const [currentLessonId, setCurrentLessonId] = useState<string | null>(null)
@@ -35,6 +39,12 @@ export const LearningPath = () => {
   const [showAchievements, setShowAchievements] = useState(false)
   const [totalCommits, setTotalCommits] = useState(0)
   const [achievements, setAchievements] = useState(initialAchievements)
+
+  const currentLevel = levelSlugToKey(user?.level?.slug) || 'beginner'
+  const lessonsInCurrentLevel = lessons?.filter(l => levelSlugToKey(l.levelId) === currentLevel) || []
+  const completedInCurrentLevel = lessonsInCurrentLevel.filter(l => l.completed).length
+  const totalInCurrentLevel = lessonsInCurrentLevel.length
+  const progressPercentage = totalInCurrentLevel > 0 ? (completedInCurrentLevel / totalInCurrentLevel) * 100 : 0
 
   const onPlayground = () => {
     router.push('/playground')
@@ -65,6 +75,36 @@ export const LearningPath = () => {
       }
     }
   }, [lessons, currentLessonId])
+
+  // Update user level when current level is completed
+  useEffect(() => {
+    if (progressPercentage === 100 && currentLevel !== 'pro' && user) {
+      const nextLevelSlug = currentLevel === 'beginner' ? 'i_know_things' : 'pro_level'
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/set-level`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ levelSlug: nextLevelSlug }),
+      })
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: [QUERY_KEY.user] })
+          addNotification({
+            type: 'success',
+            title: 'Level Up!',
+            description: `Congratulations! You've advanced to ${nextLevelSlug === 'i_know_things' ? 'I Know Things' : 'Pro'} level.`,
+          })
+        })
+        .catch(() => {
+          addNotification({
+            type: 'error',
+            title: 'Error',
+            description: 'Failed to update level. Please try again.',
+          })
+        })
+    }
+  }, [progressPercentage, currentLevel, user, queryClient, addNotification])
 
   const unlockAchievement = useCallback(
     (achievementId: string) => {
@@ -104,7 +144,7 @@ export const LearningPath = () => {
   // Map backend lessons to sidebar items with progress from backend
   const lessonItems = Array.isArray(lessons)
     ? lessons.map((lesson) => {
-        const level: 'beginner' | 'mid' | 'pro' = 'beginner'
+        const level = levelSlugToKey(lesson.levelId) as 'beginner' | 'mid' | 'pro'
 
         return {
           id: lesson.id,
@@ -247,7 +287,14 @@ export const LearningPath = () => {
   }
 
   return (
-    <div className="flex-1 bg-slate-950 pt-20">
+    <>
+      <Header
+        progressPercentage={progressPercentage}
+        gitLevel={currentLevel}
+        onShowAchievements={() => setShowAchievements(true)}
+        achievementsCount={{ unlocked: achievements.filter(a => a.unlocked).length, total: achievements.length }}
+      />
+      <div className="flex-1 bg-slate-950 pt-20">
       {/* Achievement Toast */}
       {newlyUnlockedAchievement && (
         <AchievementToast achievement={newlyUnlockedAchievement} />
@@ -383,5 +430,6 @@ export const LearningPath = () => {
         </div>
       </div>
     </div>
+    </>
   )
 }
