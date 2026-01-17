@@ -19,11 +19,13 @@ import Sidebar from './Sidebar'
 import type { KnowledgeLevel } from './KnowledgeLevelPage'
 import { useUser, levelSlugToKey } from '@/hooks/Auth/useUser'
 import { useRouter } from 'next/navigation'
+import { useNotifications } from '@/components/UI/NotificationsProvider'
 
 export const LearningPath = () => {
   const { user } = useUser()
   const router = useRouter()
   const { lessons, isLoading, isError, updateLesson, completeLesson, isUpdating } = useLessons()
+  const { addNotification } = useNotifications()
   const [currentLessonId, setCurrentLessonId] = useState<string | null>(null)
   const [gitState, setGitState] = useState<GitState>(initialGitState)
   const [showPushAnimation, setShowPushAnimation] = useState(false)
@@ -121,6 +123,9 @@ export const LearningPath = () => {
     const result = executeGitCommand(command, gitState)
 
     if (result.newState) {
+      // Check achievements before updating state
+      checkAchievements(command, result.newState)
+
       setGitState(result.newState)
 
       // Trigger animations for push/pull
@@ -135,11 +140,6 @@ export const LearningPath = () => {
     }
 
     // Auto-complete certain lessons based on actions
-    autoCompleteLesson(command)
-    if (result.type === 'success' && result.newState) {
-      checkAchievements(command, result.newState)
-    }
-    // Always check for lesson completion based on command pattern
     autoCompleteLesson(command)
 
     return result
@@ -194,13 +194,18 @@ export const LearningPath = () => {
       } catch (error) {
         console.error('Error completing lesson:', error)
       }
-    }
+   }
   }
 
   const handleCompleteLesson = () => {
     if (!currentLessonId) return
 
-    // toast.success('Lesson completed! ')
+    addNotification({
+      type: 'success',
+      title: 'Lesson Completed!',
+      description: 'Great job! Moving to the next lesson.',
+      duration: 3000
+    })
 
     // Auto-advance to next lesson after 1.5 seconds
     setTimeout(() => {

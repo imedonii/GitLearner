@@ -74,7 +74,7 @@ export const Header = ({
   }
 
   return (
-    <header className="h-18 z-9999 fixed w-[calc(100%-20rem)] px-5 py-2 ml-80 bg-slate-900/95 backdrop-blur-sm border-b border-slate-700 shadow-lg">
+    <header className="h-18 z-[9999] fixed w-[calc(100%-20rem)] px-5 py-2 ml-80 bg-slate-900/95 backdrop-blur-sm border-b border-slate-700 shadow-lg">
       <div className="flex items-center justify-between">
         {/* Git Level Badge */}
         <LevelBadge

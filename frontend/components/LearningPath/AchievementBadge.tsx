@@ -73,7 +73,7 @@ export function AchievementToast({
   const Icon = iconMap[achievement.icon]
 
   useEffect(() => {
-    const timer = setTimeout(() => setVisible(false), 5000)
+    const timer = setTimeout(() => setVisible(false), 10000)
     return () => clearTimeout(timer)
   }, [])
 

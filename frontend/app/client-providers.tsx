@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
+import { NotificationsProvider } from '@/components/UI/NotificationsProvider'
 
 export default function ClientProviders({
   children,
@@ -12,7 +13,9 @@ export default function ClientProviders({
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <NotificationsProvider>
+        {children}
+      </NotificationsProvider>
     </QueryClientProvider>
   )
 }
