@@ -29,6 +29,7 @@ model User {
   updatedAt               DateTime  @updatedAt
   userLeasonProgresses    UserLeasonProgress[]
   isVerified              Boolean   @default(false)
+  subscribed              Boolean   @default(false)
   verificationCode        String?
   verificationCodeExpiry  DateTime?
 }

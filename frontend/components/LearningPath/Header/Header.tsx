@@ -68,11 +68,6 @@ export const Header = ({
     logout()
   }
 
-  const onChangeLevel = (level: string) => {
-    // TODO: Implement level change via API
-    console.log('Change level to:', level)
-  }
-
   return (
     <header className="h-18 z-[9999] fixed w-[calc(100%-20rem)] px-5 py-2 ml-80 bg-slate-900/95 backdrop-blur-sm border-b border-slate-700 shadow-lg">
       <div className="flex items-center justify-between">
@@ -102,14 +97,8 @@ export const Header = ({
         {/* Right - User Profile */}
 
         <UserProfile
-          user={{
-            firstName: user?.firstName || '',
-            lastName: user?.lastName || '',
-            email: user?.email || '',
-            level: userLevelKey,
-          }}
+          user={user || { id: '', firstName: '', lastName: '', email: '', levelId: null, level: null, subscribed: false }}
           onLogout={onLogout}
-          onChangeLevel={onChangeLevel}
         />
       </div>
     </header>

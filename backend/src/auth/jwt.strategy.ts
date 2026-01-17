@@ -41,6 +41,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             slug: true,
           },
         },
+        subscribed: true,
       },
     });
 

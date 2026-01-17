@@ -15,6 +15,7 @@ export interface User {
   email: string
   levelId: string | null
   level: UserLevel | null
+  subscribed: boolean
 }
 
 interface useUserProps {

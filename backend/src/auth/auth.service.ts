@@ -203,6 +203,7 @@ export class AuthService {
         email: updatedUser.email,
         levelId: updatedUser.levelId,
         level: updatedUser.level,
+        subscribed: updatedUser.subscribed,
       },
     };
   }
@@ -267,6 +268,7 @@ export class AuthService {
         lastName: user.lastName,
         email: user.email,
         level: user.level,
+        subscribed: user.subscribed,
       },
       progress: {
         completedLessons: completedLessons.length,
