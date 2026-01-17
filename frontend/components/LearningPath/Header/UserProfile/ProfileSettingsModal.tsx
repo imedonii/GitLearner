@@ -18,7 +18,10 @@ import {
   Loader2,
   Save,
 } from 'lucide-react'
-import { useUpdateProfile, useUserProgress } from '@/hooks/Auth/useUpdateProfile'
+import {
+  useUpdateProfile,
+  useUserProgress,
+} from '@/hooks/Auth/useUpdateProfile'
 import { User as UserType, levelSlugToKey } from '@/hooks/Auth/useUser'
 
 interface ProfileSettingsModalProps {
@@ -28,9 +31,24 @@ interface ProfileSettingsModalProps {
 }
 
 const levelConfig = {
-  beginner: { icon: Sparkles, color: 'text-green-400', bgColor: 'bg-green-500/10', label: 'Beginner' },
-  intermediate: { icon: Zap, color: 'text-yellow-400', bgColor: 'bg-yellow-500/10', label: 'Intermediate' },
-  pro: { icon: Rocket, color: 'text-red-400', bgColor: 'bg-red-500/10', label: 'Pro' },
+  beginner: {
+    icon: Sparkles,
+    color: 'text-green-400',
+    bgColor: 'bg-green-500/10',
+    label: 'Beginner',
+  },
+  intermediate: {
+    icon: Zap,
+    color: 'text-yellow-400',
+    bgColor: 'bg-yellow-500/10',
+    label: 'Intermediate',
+  },
+  pro: {
+    icon: Rocket,
+    color: 'text-red-400',
+    bgColor: 'bg-red-500/10',
+    label: 'Pro',
+  },
 }
 
 export default function ProfileSettingsModal({
@@ -38,23 +56,37 @@ export default function ProfileSettingsModal({
   onClose,
   user,
 }: ProfileSettingsModalProps) {
-  const [activeTab, setActiveTab] = useState<'profile' | 'password' | 'progress'>('profile')
-  
+  const [activeTab, setActiveTab] = useState<
+    'profile' | 'password' | 'progress'
+  >('profile')
+
   // Profile form state
   const [firstName, setFirstName] = useState(user.firstName)
   const [lastName, setLastName] = useState(user.lastName)
   const [email, setEmail] = useState(user.email)
-  const [profileMessage, setProfileMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
-  
+  const [profileMessage, setProfileMessage] = useState<{
+    type: 'success' | 'error'
+    text: string
+  } | null>(null)
+  const [showPremiumTooltip, setShowPremiumTooltip] = useState(false)
+
   // Password form state
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
-  const [passwordMessage, setPasswordMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [passwordMessage, setPasswordMessage] = useState<{
+    type: 'success' | 'error'
+    text: string
+  } | null>(null)
 
-  const { updateProfile, changePassword, isUpdatingProfile, isChangingPassword } = useUpdateProfile()
+  const {
+    updateProfile,
+    changePassword,
+    isUpdatingProfile,
+    isChangingPassword,
+  } = useUpdateProfile()
   const { progress, isLoading: isLoadingProgress } = useUserProgress()
 
   // Reset form when modal opens
@@ -81,11 +113,16 @@ export default function ProfileSettingsModal({
         lastName: lastName !== user.lastName ? lastName : undefined,
         email: email !== user.email ? email : undefined,
       })
-      setProfileMessage({ type: 'success', text: 'Profile updated successfully!' })
+      setProfileMessage({
+        type: 'success',
+        text: 'Profile updated successfully!',
+      })
     } catch (error: unknown) {
       setProfileMessage({
         type: 'error',
-        text: (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to update profile'
+        text:
+          (error as { response?: { data?: { message?: string } } })?.response
+            ?.data?.message || 'Failed to update profile',
       })
     }
   }
@@ -100,7 +137,10 @@ export default function ProfileSettingsModal({
     }
 
     if (newPassword.length < 6) {
-      setPasswordMessage({ type: 'error', text: 'Password must be at least 6 characters' })
+      setPasswordMessage({
+        type: 'error',
+        text: 'Password must be at least 6 characters',
+      })
       return
     }
 
@@ -109,14 +149,19 @@ export default function ProfileSettingsModal({
         currentPassword,
         newPassword,
       })
-      setPasswordMessage({ type: 'success', text: 'Password changed successfully!' })
+      setPasswordMessage({
+        type: 'success',
+        text: 'Password changed successfully!',
+      })
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
     } catch (error: unknown) {
       setPasswordMessage({
         type: 'error',
-        text: (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to change password'
+        text:
+          (error as { response?: { data?: { message?: string } } })?.response
+            ?.data?.message || 'Failed to change password',
       })
     }
   }
@@ -124,6 +169,9 @@ export default function ProfileSettingsModal({
   const currentLevelKey = levelSlugToKey(user.level?.slug)
   const currentLevel = levelConfig[currentLevelKey]
   const CurrentLevelIcon = currentLevel?.icon || Sparkles
+  const isPremiumLevel =
+    !user.subscribed &&
+    (currentLevelKey === 'intermediate' || currentLevelKey === 'pro')
 
   // State for portal mounting
   const [mounted, setMounted] = useState(false)
@@ -277,19 +325,55 @@ export default function ProfileSettingsModal({
                     <label className="block text-sm font-medium text-slate-300 mb-2">
                       Current Level
                     </label>
-                     <div className={`flex items-center gap-3 p-3 rounded-lg border-2 ${currentLevel?.bgColor} border-slate-700`}>
-                       <CurrentLevelIcon className={`w-5 h-5 ${currentLevel?.color}`} />
-                       <span className="text-white font-medium">{currentLevel?.label || 'Unknown'}</span>
-                     </div>
+                    <div className="relative">
+                      <div
+                        className={`flex items-center gap-3 p-3 rounded-lg border-2 ${
+                          currentLevel?.bgColor
+                        } border-slate-700 ${
+                          isPremiumLevel ? 'cursor-pointer' : ''
+                        }`}
+                        onMouseEnter={() =>
+                          isPremiumLevel && setShowPremiumTooltip(true)
+                        }
+                        onMouseLeave={() => setShowPremiumTooltip(false)}
+                      >
+                        <CurrentLevelIcon
+                          className={`w-5 h-5 ${currentLevel?.color}`}
+                        />
+                        <span className="text-white font-medium">
+                          {currentLevel?.label || 'Unknown'}
+                        </span>
+                        {isPremiumLevel && (
+                          <Lock className="w-4 h-4 text-yellow-400 ml-auto" />
+                        )}
+                      </div>
+                      {/* Premium Tooltip */}
+                      <AnimatePresence>
+                        {showPremiumTooltip && isPremiumLevel && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
+                            className="absolute top-full left-1/2 -translate-x-1/2 mt-2 flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 border border-yellow-500/50 text-yellow-400 text-xs rounded-full shadow-xl whitespace-nowrap z-10"
+                          >
+                            <Lock className="w-3 h-3" />
+                            Premium
+                            <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-t border-l border-yellow-500/50 rotate-45" />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </div>
 
                   {/* Message */}
                   {profileMessage && (
-                    <div className={`p-3 rounded-lg ${
-                      profileMessage.type === 'success' 
-                        ? 'bg-emerald-500/10 border border-emerald-500/50 text-emerald-400' 
-                        : 'bg-red-500/10 border border-red-500/50 text-red-400'
-                    }`}>
+                    <div
+                      className={`p-3 rounded-lg ${
+                        profileMessage.type === 'success'
+                          ? 'bg-emerald-500/10 border border-emerald-500/50 text-emerald-400'
+                          : 'bg-red-500/10 border border-red-500/50 text-red-400'
+                      }`}
+                    >
                       {profileMessage.text}
                     </div>
                   )}
@@ -297,7 +381,12 @@ export default function ProfileSettingsModal({
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    disabled={isUpdatingProfile || (firstName === user.firstName && lastName === user.lastName && email === user.email)}
+                    disabled={
+                      isUpdatingProfile ||
+                      (firstName === user.firstName &&
+                        lastName === user.lastName &&
+                        email === user.email)
+                    }
                     className="w-full flex items-center justify-center gap-2 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-700 disabled:text-slate-500 text-white font-medium rounded-lg transition-colors"
                   >
                     {isUpdatingProfile ? (
@@ -329,10 +418,16 @@ export default function ProfileSettingsModal({
                       />
                       <button
                         type="button"
-                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        onClick={() =>
+                          setShowCurrentPassword(!showCurrentPassword)
+                        }
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-400"
                       >
-                        {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        {showCurrentPassword ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -356,7 +451,11 @@ export default function ProfileSettingsModal({
                         onClick={() => setShowNewPassword(!showNewPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-400"
                       >
-                        {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        {showNewPassword ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -380,11 +479,13 @@ export default function ProfileSettingsModal({
 
                   {/* Message */}
                   {passwordMessage && (
-                    <div className={`p-3 rounded-lg ${
-                      passwordMessage.type === 'success' 
-                        ? 'bg-emerald-500/10 border border-emerald-500/50 text-emerald-400' 
-                        : 'bg-red-500/10 border border-red-500/50 text-red-400'
-                    }`}>
+                    <div
+                      className={`p-3 rounded-lg ${
+                        passwordMessage.type === 'success'
+                          ? 'bg-emerald-500/10 border border-emerald-500/50 text-emerald-400'
+                          : 'bg-red-500/10 border border-red-500/50 text-red-400'
+                      }`}
+                    >
                       {passwordMessage.text}
                     </div>
                   )}
@@ -392,7 +493,12 @@ export default function ProfileSettingsModal({
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    disabled={isChangingPassword || !currentPassword || !newPassword || !confirmPassword}
+                    disabled={
+                      isChangingPassword ||
+                      !currentPassword ||
+                      !newPassword ||
+                      !confirmPassword
+                    }
                     className="w-full flex items-center justify-center gap-2 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-700 disabled:text-slate-500 text-white font-medium rounded-lg transition-colors"
                   >
                     {isChangingPassword ? (
@@ -417,21 +523,58 @@ export default function ProfileSettingsModal({
                       {/* Progress Overview */}
                       <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
                         <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-lg font-semibold text-white">Learning Progress</h3>
-                          <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${currentLevel?.bgColor}`}>
-                            <CurrentLevelIcon className={`w-4 h-4 ${currentLevel?.color}`} />
-                            <span className={`text-sm font-medium ${currentLevel?.color}`}>
-                              {currentLevel?.label}
-                            </span>
+                          <h3 className="text-lg font-semibold text-white">
+                            Learning Progress
+                          </h3>
+                          <div className="relative">
+                            <div
+                              className={`flex items-center gap-2 px-3 py-1 rounded-full ${
+                                currentLevel?.bgColor
+                              } ${isPremiumLevel ? 'cursor-pointer' : ''}`}
+                              onMouseEnter={() =>
+                                isPremiumLevel && setShowPremiumTooltip(true)
+                              }
+                              onMouseLeave={() => setShowPremiumTooltip(false)}
+                            >
+                              <CurrentLevelIcon
+                                className={`w-4 h-4 ${currentLevel?.color}`}
+                              />
+                              <span
+                                className={`text-sm font-medium ${currentLevel?.color}`}
+                              >
+                                {currentLevel?.label}
+                              </span>
+                              {isPremiumLevel && (
+                                <Lock className="w-3 h-3 text-yellow-400" />
+                              )}
+                            </div>
+                            {/* Premium Tooltip */}
+                            <AnimatePresence>
+                              {showPremiumTooltip && isPremiumLevel && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, y: 10 }}
+                                  className="absolute top-full left-1/2 -translate-x-1/2 mt-2 flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/50 text-yellow-400 text-xs rounded-full shadow-xl whitespace-nowrap z-10"
+                                >
+                                  <Lock className="w-3 h-3" />
+                                  Premium
+                                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-t border-l border-yellow-500/50 rotate-45" />
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
                           </div>
                         </div>
-                        
+
                         {/* Progress Bar */}
                         <div className="mb-4">
                           <div className="flex justify-between text-sm mb-2">
-                            <span className="text-slate-400">Completed Lessons</span>
+                            <span className="text-slate-400">
+                              Completed Lessons
+                            </span>
                             <span className="text-white font-medium">
-                              {progress.completedLessons} / {progress.totalLessons}
+                              {progress.completedLessons} /{' '}
+                              {progress.totalLessons}
                             </span>
                           </div>
                           <div className="h-3 bg-slate-700 rounded-full overflow-hidden">
@@ -451,12 +594,18 @@ export default function ProfileSettingsModal({
                         <div className="grid grid-cols-2 gap-4">
                           <div className="bg-slate-900 rounded-lg p-4 text-center">
                             <Trophy className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
-                            <p className="text-2xl font-bold text-white">{progress.completedLessons}</p>
-                            <p className="text-xs text-slate-400">Lessons Completed</p>
+                            <p className="text-2xl font-bold text-white">
+                              {progress.completedLessons}
+                            </p>
+                            <p className="text-xs text-slate-400">
+                              Lessons Completed
+                            </p>
                           </div>
                           <div className="bg-slate-900 rounded-lg p-4 text-center">
                             <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
-                            <p className="text-2xl font-bold text-white">{progress.percentage}%</p>
+                            <p className="text-2xl font-bold text-white">
+                              {progress.percentage}%
+                            </p>
                             <p className="text-xs text-slate-400">Progress</p>
                           </div>
                         </div>
@@ -469,29 +618,33 @@ export default function ProfileSettingsModal({
                             Recent Completions
                           </h3>
                           <div className="space-y-2">
-                            {progress.recentCompletions.map((completion, index) => (
-                              <div
-                                key={completion.lessonId}
-                                className="flex items-center gap-3 p-3 bg-slate-800 rounded-lg border border-slate-700"
-                              >
-                                <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                            {progress.recentCompletions.map(
+                              (completion, index) => (
+                                <div
+                                  key={completion.lessonId}
+                                  className="flex items-center gap-3 p-3 bg-slate-800 rounded-lg border border-slate-700"
+                                >
+                                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-white font-medium truncate">
+                                      {completion.lessonTitle}
+                                    </p>
+                                    <p className="text-xs text-slate-400">
+                                      {new Date(
+                                        completion.completedAt
+                                      ).toLocaleDateString('en-US', {
+                                        month: 'short',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                      })}
+                                    </p>
+                                  </div>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-white font-medium truncate">
-                                    {completion.lessonTitle}
-                                  </p>
-                                  <p className="text-xs text-slate-400">
-                                    {new Date(completion.completedAt).toLocaleDateString('en-US', {
-                                      month: 'short',
-                                      day: 'numeric',
-                                      hour: '2-digit',
-                                      minute: '2-digit',
-                                    })}
-                                  </p>
-                                </div>
-                              </div>
-                            ))}
+                              )
+                            )}
                           </div>
                         </div>
                       )}
@@ -499,8 +652,12 @@ export default function ProfileSettingsModal({
                   ) : (
                     <div className="text-center py-12">
                       <Trophy className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-                      <p className="text-slate-400">No progress data available yet.</p>
-                      <p className="text-sm text-slate-500">Complete some lessons to see your progress!</p>
+                      <p className="text-slate-400">
+                        No progress data available yet.
+                      </p>
+                      <p className="text-sm text-slate-500">
+                        Complete some lessons to see your progress!
+                      </p>
                     </div>
                   )}
                 </div>

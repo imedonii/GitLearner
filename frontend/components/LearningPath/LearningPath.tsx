@@ -270,6 +270,7 @@ export const LearningPath = () => {
         onCheatSheet={onCheatSheet}
         onHelpAndTips={onHelpAndTips}
         userLevel={levelSlugToKey(user?.level?.slug)}
+        subscribed={user?.subscribed ?? false}
       />
 
       {/* Main Content Area - with margin for fixed sidebar, entire page scrollable */}

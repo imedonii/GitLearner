@@ -4,12 +4,10 @@ import { Check, GitBranch, Lock, Rocket, Sparkles, Zap } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useUser } from '@/hooks/Auth/useUser'
+import AppTooltip from '@/components/UI/AppTooltip'
 
 export type KnowledgeLevel = 'beginner' | 'intermediate' | 'pro'
-
-interface KnowledgeLevelPageProps {
-  onSelectLevel: (level: KnowledgeLevel) => void
-}
 
 interface LevelCard {
   id: KnowledgeLevel
@@ -80,9 +78,16 @@ const levels: LevelCard[] = [
 
 export const Level = () => {
   const router = useRouter()
+  const { user } = useUser()
   const [selectedLevel, setSelectedLevel] = useState<KnowledgeLevel>('beginner')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [lockedLevelTooltip, setLockedLevelTooltip] =
+    useState<KnowledgeLevel | null>(null)
+
+  const isLevelLocked = (levelId: KnowledgeLevel) => {
+    return !user?.subscribed && levelId !== 'beginner'
+  }
 
   const handleContinue = async () => {
     if (!selectedLevel) return
@@ -149,7 +154,7 @@ export const Level = () => {
           {levels.map((level, index) => {
             const Icon = level.icon
             const isSelected = selectedLevel === level.id
-            const isDisabled = level.id !== 'beginner'
+            const isLocked = isLevelLocked(level.id)
 
             return (
               <motion.div
@@ -158,21 +163,25 @@ export const Level = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 className={`relative bg-slate-900 border-2 rounded-xl p-6 text-left transition-all ${
-                  isDisabled
+                  isLocked
                     ? 'opacity-50 cursor-not-allowed'
-                    : ''
+                    : 'cursor-pointer hover:border-slate-600'
                 } ${
                   isSelected
-                    ? `${level.borderColor} shadow-lg`
+                    ? level.borderColor + ' shadow-lg'
                     : 'border-slate-700'
                 }`}
+                onClick={() => !isLocked && setSelectedLevel(level.id)}
+                onMouseEnter={() => isLocked && setLockedLevelTooltip(level.id)}
+                onMouseLeave={() => setLockedLevelTooltip(null)}
               >
-                {/* Coming Soon Badge for disabled levels */}
-                {isDisabled && (
-                  <div className="absolute top-3 right-3 px-2 py-1 bg-slate-700 text-slate-400 text-xs rounded-full">
-                    Coming Soon
-                  </div>
-                )}
+                 {/* Premium Tooltip */}
+                 <AppTooltip
+                   isVisible={lockedLevelTooltip === level.id && isLocked}
+                   content="Premium"
+                   variant="premium"
+                   position="top"
+                 />
 
                 {/* Selection Indicator */}
                 {isSelected && (
@@ -205,47 +214,28 @@ export const Level = () => {
 
                 {/* Features */}
                 <div className="space-y-2">
-                  {level.features.map((feature) => (
-                    <div key={feature} className="flex items-start gap-2">
-                      {feature.includes('Locked') ||
-                      feature.includes('Must') ? (
-                        <Lock className="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0" />
-                      ) : (
-                        <Check
-                          className={`w-4 h-4 ${level.iconColor} mt-0.5 flex-shrink-0`}
-                        />
-                      )}
-                      <span className="text-xs text-slate-400">{feature}</span>
-                    </div>
-                  ))}
+                  {level.features.map((feature) => {
+                    return (
+                      <div key={feature} className="flex items-start gap-2">
+                        {feature.includes('Locked') ||
+                        feature.includes('Must') ? (
+                          <Lock className="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0" />
+                        ) : (
+                          <Check
+                            className={`w-4 h-4 ${level.iconColor} mt-0.5 flex-shrink-0`}
+                          />
+                        )}
+                        <span className="text-xs text-slate-400">
+                          {feature}
+                        </span>
+                      </div>
+                    )
+                  })}
                 </div>
               </motion.div>
             )
           })}
         </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="text-center mb-4">
-            <p className="text-red-400 text-sm">{error}</p>
-          </div>
-        )}
-
-        {/* Continue Button */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="text-center"
-        >
-          <button
-            onClick={handleContinue}
-            disabled={!selectedLevel || isLoading}
-            className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 disabled:from-slate-700 disabled:to-slate-700 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all text-lg"
-          >
-            {isLoading ? 'Setting up...' : 'Continue'}
-          </button>
-        </motion.div>
 
         {/* Help Text */}
         <p className="text-center text-sm text-slate-500 mt-6">

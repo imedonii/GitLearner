@@ -62,8 +62,6 @@ export const Header = ({
   const config = levelConfig[gitLevel as keyof typeof levelConfig] || levelConfig.beginner
   const Icon = config.icon
 
-  const userLevelKey = levelSlugToKey(user?.level?.slug)
-
   const onLogout = () => {
     logout()
   }

@@ -14,9 +14,11 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import { Button } from '@/components/UI'
+import AppTooltip from '@/components/UI/AppTooltip'
 import { useState } from 'react'
 import { KnowledgeLevel } from './KnowledgeLevelPage'
 import { LessonLevel } from '@/utils/lessons'
+import type { LessonLevel as LessonLevelType } from '@/utils/lessons'
 
 export interface LessonItem {
   id: string
@@ -36,6 +38,7 @@ interface SidebarProps {
   onCheatSheet: () => void
   onHelpAndTips: () => void
   userLevel?: KnowledgeLevel
+  subscribed?: boolean
 }
 
 interface LessonGroup {
@@ -57,10 +60,19 @@ export default function Sidebar({
   onCheatSheet,
   onHelpAndTips,
   userLevel,
+  subscribed = false,
 }: SidebarProps) {
-  const [expandedLevels, setExpandedLevels] = useState<Set<LessonLevel>>(
+  const [expandedLevels, setExpandedLevels] = useState<Set<LessonLevelType>>(
     new Set(['beginner', 'mid', 'pro'])
   )
+  const [premiumTooltip, setPremiumTooltip] = useState<LessonLevelType | null>(
+    null
+  )
+  const [lessonTooltip, setLessonTooltip] = useState<string | null>(null)
+
+  const isLevelPremium = (level: LessonLevelType) => {
+    return !subscribed && (level === 'mid' || level === 'pro')
+  }
 
   // Group lessons by level
   const groupedLessons: LessonGroup[] = [
@@ -191,43 +203,74 @@ export default function Sidebar({
             return (
               <div key={group.level} className="space-y-2">
                 {/* Level Header */}
-                <button
-                  onClick={() => toggleLevel(group.level)}
-                  className={`w-full p-3 rounded-lg ${group.bgColor} ${group.borderColor} border hover:opacity-80 transition-opacity`}
+                <div
+                  className="relative"
+                  onMouseEnter={() =>
+                    isLevelPremium(group.level) &&
+                    setPremiumTooltip(group.level)
+                  }
+                  onMouseLeave={() => setPremiumTooltip(null)}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      {isExpanded ? (
-                        <ChevronDown className="w-4 h-4 text-slate-400" />
-                      ) : (
-                        <ChevronRight className="w-4 h-4 text-slate-400" />
-                      )}
-                      <span className="text-lg">{group.emoji}</span>
-                      <span className={`font-semibold ${group.color}`}>
-                        {group.name}
+                  <button
+                    onClick={() =>
+                      !isLevelPremium(group.level) && toggleLevel(group.level)
+                    }
+                    disabled={isLevelPremium(group.level)}
+                    className={`w-full p-3 rounded-lg ${group.bgColor} ${
+                      group.borderColor
+                    } border ${
+                      isLevelPremium(group.level)
+                        ? 'opacity-60 cursor-not-allowed'
+                        : 'hover:opacity-80'
+                    } transition-opacity`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        {isLevelPremium(group.level) ? (
+                          <Lock className="w-4 h-4 text-yellow-400" />
+                        ) : isExpanded ? (
+                          <ChevronDown className="w-4 h-4 text-slate-400" />
+                        ) : (
+                          <ChevronRight className="w-4 h-4 text-slate-400" />
+                        )}
+                        <span className="text-lg">{group.emoji}</span>
+                        <span className={`font-semibold ${group.color}`}>
+                          {group.name}
+                        </span>
+                      </div>
+                      <span className="text-xs text-slate-400">
+                        {completedInLevel}/{group.lessons.length}
                       </span>
                     </div>
-                    <span className="text-xs text-slate-400">
-                      {completedInLevel}/{group.lessons.length}
-                    </span>
-                  </div>
 
-                  {/* Level Progress Bar */}
-                  <div className="w-full bg-slate-800/50 rounded-full h-1.5 overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${progressInLevel}%` }}
-                      transition={{ duration: 0.3 }}
-                      className={`h-full ${
-                        group.level === 'beginner'
-                          ? 'bg-emerald-400'
-                          : group.level === 'mid'
-                          ? 'bg-yellow-400'
-                          : 'bg-red-400'
-                      }`}
-                    />
-                  </div>
-                </button>
+                    {/* Level Progress Bar */}
+                    <div className="w-full bg-slate-800/50 rounded-full h-1.5 overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progressInLevel}%` }}
+                        transition={{ duration: 0.3 }}
+                        className={`h-full ${
+                          group.level === 'beginner'
+                            ? 'bg-emerald-400'
+                            : group.level === 'mid'
+                            ? 'bg-yellow-400'
+                            : 'bg-red-400'
+                        }`}
+                      />
+                    </div>
+                  </button>
+
+                  {/* Premium Tooltip */}
+                  <AppTooltip
+                    isVisible={
+                      premiumTooltip === group.level &&
+                      isLevelPremium(group.level)
+                    }
+                    content="Premium"
+                    variant="premium"
+                    position="top"
+                  />
+                </div>
 
                 {/* Lessons in Level */}
                 <AnimatePresence>
@@ -241,59 +284,75 @@ export default function Sidebar({
                     >
                       {group.lessons.map((lesson) => {
                         const isLocked =
-                          lesson.locked && userLevel === 'beginner'
+                          (lesson.locked && userLevel === 'beginner') ||
+                          isLevelPremium(group.level)
                         const isCurrent = currentLessonId === lesson.id
 
                         // Get level badge emoji
                         const levelEmoji = group.emoji
+                        const isPremiumLocked = isLevelPremium(group.level)
 
                         return (
-                          <motion.button
-                            key={lesson.id}
-                            onClick={() =>
-                              !isLocked && onLessonSelect(lesson.id)
-                            }
-                            whileHover={!isLocked ? { x: 4 } : {}}
-                            disabled={isLocked}
-                            title={
-                              isLocked
-                                ? 'Complete previous lessons to unlock'
-                                : lesson.description || undefined
-                            }
-                            className={`w-full text-left p-3 rounded-lg transition-colors flex items-center gap-3 ${
-                              isCurrent
-                                ? 'bg-emerald-500/20 border border-emerald-500/50 text-white'
-                                : isLocked
-                                ? 'text-slate-600 opacity-50 cursor-not-allowed'
-                                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                            }`}
-                          >
-                            <div className="flex-shrink-0">
-                              {isLocked ? (
-                                <Lock className="w-5 h-5 text-slate-600" />
-                              ) : lesson.completed ? (
-                                <CheckCircle2 className="w-5 h-5 text-green-400" />
-                              ) : isCurrent ? (
-                                <Play className="w-5 h-5 text-emerald-400" />
-                              ) : (
-                                <Circle className="w-5 h-5" />
-                              )}
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-0.5">
-                                <span className="text-xs">{levelEmoji}</span>
-                                <span className="text-xs text-slate-500">
-                                  Lesson{' '}
-                                  {lessons.findIndex(
-                                    (l) => l.id === lesson.id
-                                  ) + 1}
-                                </span>
+                          <div key={lesson.id} className="relative">
+                            <motion.button
+                              onClick={() =>
+                                !isLocked && onLessonSelect(lesson.id)
+                              }
+                              whileHover={!isLocked ? { x: 4 } : {}}
+                              disabled={isLocked}
+                              onMouseEnter={() =>
+                                isLocked && setLessonTooltip(lesson.id)
+                              }
+                              onMouseLeave={() => setLessonTooltip(null)}
+                              className={`w-full text-left p-3 rounded-lg transition-colors flex items-center gap-3 ${
+                                isCurrent
+                                  ? 'bg-emerald-500/20 border border-emerald-500/50 text-white'
+                                  : isLocked
+                                  ? 'text-slate-600 opacity-50 cursor-not-allowed'
+                                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                              }`}
+                            >
+                              <div className="flex-shrink-0">
+                                {isLocked ? (
+                                  <Lock className="w-5 h-5 text-slate-600" />
+                                ) : lesson.completed ? (
+                                  <CheckCircle2 className="w-5 h-5 text-green-400" />
+                                ) : isCurrent ? (
+                                  <Play className="w-5 h-5 text-emerald-400" />
+                                ) : (
+                                  <Circle className="w-5 h-5" />
+                                )}
                               </div>
-                              <div className="text-sm font-medium">
-                                {lesson.title}
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-0.5">
+                                  <span className="text-xs">{levelEmoji}</span>
+                                  <span className="text-xs text-slate-500">
+                                    Lesson{' '}
+                                    {lessons.findIndex(
+                                      (l) => l.id === lesson.id
+                                    ) + 1}
+                                  </span>
+                                </div>
+                                <div className="text-sm font-medium">
+                                  {lesson.title}
+                                </div>
                               </div>
-                            </div>
-                          </motion.button>
+                            </motion.button>
+
+                            {/* Premium or Locked Tooltip */}
+                            <AppTooltip
+                              isVisible={
+                                lessonTooltip === lesson.id && isLocked
+                              }
+                              content={
+                                isPremiumLocked
+                                  ? 'Premium'
+                                  : 'Complete previous lessons'
+                              }
+                              variant={isPremiumLocked ? 'premium' : 'locked'}
+                              position="top"
+                            />
+                          </div>
                         )
                       })}
                     </motion.div>
