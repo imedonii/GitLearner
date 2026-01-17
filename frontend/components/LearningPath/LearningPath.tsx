@@ -115,27 +115,7 @@ export const LearningPath = () => {
       })
     : []
 
-  // Build completion map from lessons
-  const lessonCompletionMap = lessons?.reduce((map, lesson) => {
-    const example = lesson.exampleCommand
-    if (!example) return map
 
-    // Split by lines and take first line
-    const firstLine = example.split('\n')[0]
-
-    // Split by ' or ' to handle alternatives
-    const commands = firstLine.split(' or ').map(cmd => cmd.trim())
-
-    commands.forEach(cmd => {
-      // Remove quotes and extra parts for the key
-      const cleanCmd = cmd.split(' ')[0] + ' ' + cmd.split(' ')[1] // e.g., 'git help', 'git --version'
-      if (cleanCmd.includes('git')) {
-        map[cleanCmd] = lesson.slug
-      }
-    })
-
-    return map
-  }, {} as Record<string, string>) || {}
 
   const handleCommand = (command: string) => {
     const result = executeGitCommand(command, gitState)
@@ -155,13 +135,12 @@ export const LearningPath = () => {
     }
 
     // Auto-complete certain lessons based on actions
-    const shouldCompleteLesson = result.type === 'success' || Object.keys(lessonCompletionMap).some(cmd => command.startsWith(cmd))
-    if (shouldCompleteLesson) {
-      autoCompleteLesson(command)
-      if (result.newState) {
-        checkAchievements(command, result.newState)
-      }
+    autoCompleteLesson(command)
+    if (result.type === 'success' && result.newState) {
+      checkAchievements(command, result.newState)
     }
+    // Always check for lesson completion based on command pattern
+    autoCompleteLesson(command)
 
     return result
   }
@@ -207,15 +186,13 @@ export const LearningPath = () => {
 
     if (!activeLesson) return
 
-    for (const [cmd, slug] of Object.entries(lessonCompletionMap)) {
-      if (command.startsWith(cmd) && activeLesson.slug === slug && !activeLesson.completed) {
-        try {
-          await completeLesson(currentLessonId, activeLesson.levelId)
-          handleCompleteLesson()
-        } catch (error) {
-          console.error('Error completing lesson:', error)
-        }
-        break
+    const pattern = activeLesson.completionPattern ? new RegExp(activeLesson.completionPattern) : null
+    if (pattern && pattern.test(command) && !activeLesson.completed) {
+      try {
+        await completeLesson(currentLessonId, activeLesson.levelId)
+        handleCompleteLesson()
+      } catch (error) {
+        console.error('Error completing lesson:', error)
       }
     }
   }

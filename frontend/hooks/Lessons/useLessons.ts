@@ -13,6 +13,7 @@ export interface Lesson {
   objective: string
   levelId: string
   order: number
+  completionPattern?: string
   createdAt: string
   updatedAt: string
   completed: boolean

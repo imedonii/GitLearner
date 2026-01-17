@@ -8,6 +8,7 @@ export const lessons: any[] = [
     exampleCommand: 'git help',
     objective: 'Learn how to access Git documentation',
     hint: "Try 'git help status' to see help for a specific command",
+    completionPattern: '^git help$',
     isPaid: false,
     order: 1,
   },

@@ -6,6 +6,22 @@ import { Pool } from 'pg';
 // Import your lessons array
 import { lessons } from './lessons-data'; // adjust path if needed
 
+const completionPatterns: Record<string, string> = {
+  'help': '^git help$',
+  'version': '^git (?:--version|-v)$',
+  'config': 'git config --global user\\.(?:name|email) ".*"',
+  'init': '^git init',
+  'status': '^git status$',
+  'add': '^git add',
+  'commit': '^git commit -m ".+"$',
+  'log': '^git log$',
+  'branch': '^git branch',
+  'checkout': '^git checkout',
+  'push': '^git push',
+  'pull': '^git pull',
+  'clone': '^git clone https?:\\/\\/',
+}
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
@@ -44,22 +60,23 @@ async function main() {
     // All lessons are assigned to 'new_here' level
     const levelSlug = 'new_here';
 
-    await prisma.leasons.upsert({
-      where: { slug: lesson.id }, // use your `slug` column
-      update: {},
-      create: {
-        slug: lesson.id,
-        title: lesson.title,
-        description: lesson.description,
-        explanation: lesson.explanation,
-        exampleCommand: lesson.exampleCommand,
-        hint: lesson.hint,
-        objective: lesson.objective,
-        isPaid: lesson.isPaid,
-        order: lesson.order,
-        levelId: getLevelId(levelSlug),
-      },
-    });
+     await prisma.leasons.upsert({
+       where: { slug: lesson.id }, // use your `slug` column
+       update: {},
+       create: {
+         slug: lesson.id,
+         title: lesson.title,
+         description: lesson.description,
+         explanation: lesson.explanation,
+         exampleCommand: lesson.exampleCommand,
+         hint: lesson.hint,
+         objective: lesson.objective,
+         completionPattern: completionPatterns[lesson.id] || null,
+         isPaid: lesson.isPaid,
+         order: lesson.order,
+         levelId: getLevelId(levelSlug),
+       },
+     });
   }
 
   console.log('✅ Seeded lessons!');

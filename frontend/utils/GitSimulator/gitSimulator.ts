@@ -531,9 +531,18 @@ See 'git --help' for more information.`,
 
   // Git clone
   if (command.startsWith('git clone')) {
-    return {
-      output: 'Cloning into repository...\nClone complete!',
-      type: 'success',
+    const urlMatch = command.match(/git clone (https?:\/\/[^\s]+)/)
+    if (urlMatch) {
+      return {
+        output: `Cloning into 'repo'...\nremote: Enumerating objects: 3, done.\nremote: Counting objects: 100%, (3/3), done.\nremote: Compressing objects: 100%, (2/2), done.\nremote: Total 3 (delta 0), reused 0 (delta 0), pack-reused 0\nReceiving objects: 100% (3/3), done.`,
+        type: 'success',
+        newState: { ...state, initialized: true }, // Assume it initializes a repo
+      }
+    } else {
+      return {
+        output: 'fatal: You must specify a repository to clone.',
+        type: 'error',
+      }
     }
   }
 

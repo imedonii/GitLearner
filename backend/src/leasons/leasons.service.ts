@@ -15,6 +15,7 @@ export interface LessonWithProgress {
   objective: string;
   levelId: string;
   order: number;
+  completionPattern?: string;
   createdAt: Date;
   updatedAt: Date;
   completed: boolean;
@@ -81,6 +82,23 @@ export class LeasonsService {
       userProgress.map((p) => [p.leasonId, p.isCompleted]),
     );
 
+    // Define completion patterns for each lesson slug
+    const completionPatterns: Record<string, string> = {
+      'help': '^git help$',
+      'version': '^git (?:--version|-v)$',
+      'config': 'git config --global user\\.(?:name|email) ".*"',
+      'init': '^git init$',
+      'status': '^git status$',
+      'add': '^git add',
+      'commit': '^git commit -m ".+"$',
+      'log': '^git log$',
+      'branch': '^git branch',
+      'checkout': '^git checkout',
+      'push': '^git push',
+      'pull': '^git pull',
+      'clone': '^git clone https?:\\/\\/[^\\s]+$',
+    };
+
     const lessonsWithLock: LessonWithProgress[] = lessons.map((lesson) => {
       const isCompleted = progressMap.get(lesson.id) || false;
 
@@ -95,6 +113,7 @@ export class LeasonsService {
         objective: lesson.objective,
         levelId: lesson.levelId,
         order: lesson.order,
+        completionPattern: completionPatterns[lesson.slug] || undefined,
         createdAt: lesson.createdAt,
         updatedAt: lesson.updatedAt,
         completed: isCompleted,
