@@ -33,6 +33,7 @@ const prisma = new PrismaClient({
 async function main() {
   // 1️⃣ Seed Levels
   const levelsData = [
+    { name: 'Newbie', slug: 'newbie' },
     { name: 'New here', slug: 'new_here' },
     { name: 'I know things', slug: 'i_know_things' },
     { name: 'Pro', slug: 'pro_level' },
@@ -71,10 +72,13 @@ async function main() {
          exampleCommand: lesson.exampleCommand,
          hint: lesson.hint,
          objective: lesson.objective,
-         completionPattern: completionPatterns[lesson.id] || null,
-         isPaid: lesson.isPaid,
-         order: lesson.order,
-         levelId: getLevelId(levelSlug),
+          completionPattern: completionPatterns[lesson.id] || null,
+          isPaid: lesson.isPaid,
+          order: lesson.order,
+          category: lesson.category,
+          practiceTask: lesson.practiceTask,
+          isFoundation: lesson.isFoundation,
+          levelId: getLevelId(levelSlug),
        },
      });
   }

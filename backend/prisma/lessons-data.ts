@@ -1,5 +1,95 @@
 export const lessons: any[] = [
   {
+    id: "foundation-what-is-git",
+    title: "🎯 What Is Git?",
+    description: "Understand what Git is and why it's called version control",
+    explanation:
+      "Git is like a time machine for your code! Imagine writing a story and wanting to go back to an earlier version - Git does exactly that for computer code. It's a version control system that remembers every version of your project, so you can always go back in time if needed.\n\n**Why It's Called Version Control:**\nVersion control means keeping track of different versions of something. Just like Google Docs shows you the history of your document, Git keeps a complete history of your code. The cool part? Git is super smart - it doesn't save everything over and over, it remembers what changed, using very little space!\n\n**Git Runs on Your Computer:**\nGit lives on your own computer and doesn't need the internet to work! This makes it super fast and reliable. Later, you can share your work with others using the internet, but the main magic happens right on your machine.\n\n💡 **Real-Life Example:** Think about playing a video game. You reach a boss fight and save your game. If you lose, you can reload from that save point. Git works the same way - you can 'save' your code at important moments and go back if something breaks!",
+    exampleCommand: "",
+    objective: "Understand that Git is a version control system that tracks changes to your code",
+    hint: "Git is like a time machine - it lets you save checkpoints and go back anytime!",
+    practiceTask: "Read through this lesson carefully. No commands needed yet - we're building your foundation!",
+    isFoundation: true,
+    isPaid: false,
+    order: 13,
+    category: 'Git Concepts',
+  },
+  {
+    id: "foundation-why-git",
+    title: "💡 Why Do We Need Git?",
+    description: "Learn why millions of developers rely on Git every single day",
+    explanation:
+      "Before Git, developers had big problems:\n• What if you broke your code and couldn't remember what changed?\n• What if two people edited the same file at the same time?\n• What if you wanted to try a new idea without risking your working code?\n\nGit solves all of these problems! It's like having a safety net that lets you experiment freely.\n\n**Collaboration Made Easy:**\nImagine you and three friends building a website together. Without Git, you'd be emailing files back and forth, getting confused about who has the latest version. With Git, everyone can work on their own copy, and Git helps merge everyone's work together smoothly!\n\n**Freedom to Experiment:**\nWith Git, you can try new ideas without fear. Want to test a new feature? Create a copy (called a 'branch'), experiment there, and if it works, merge it back. If it doesn't? Just delete that branch - your main code is safe!\n\n💡 **Real-Life Example:** Think of Google Docs, where multiple people can edit at once and see who changed what. Git does this for code! It tracks who made each change and when, making teamwork much easier.",
+    exampleCommand: "",
+    objective: "Understand how Git protects your work and enables collaboration",
+    hint: "Git gives you confidence to experiment because you can always go back!",
+    practiceTask: "Think about a time you wished you could undo changes - that's why we need Git!",
+    isFoundation: true,
+    isPaid: false,
+    order: 14,
+    category: 'Git Concepts',
+  },
+  {
+    id: "foundation-git-vs-github",
+    title: "🌐 Git vs GitHub",
+    description: "Understand the difference - they're not the same thing!",
+    explanation:
+      "**Git: The Tool**\nGit is a program that runs on your computer. It's the actual version control system that tracks your code changes. Think of it as the engine that makes everything work. Git was created by Linus Torvalds (who also created Linux!) in 2005. It's free and open-source!\n\n**GitHub: The Social Network**\nGitHub is a website where you can store your Git projects online. It's like Google Drive or Dropbox, but specifically designed for code. GitHub adds social features - you can follow other developers, star projects you like, and contribute to projects from around the world!\n\n💡 **Simple Analogy:** Git is like your phone's camera app - it takes photos. GitHub is like Instagram - it's where you share those photos with others. You can take photos without Instagram, and you can use Git without GitHub!\n\n**Other Platforms:**\nGitHub isn't the only place to host Git projects! There's also GitLab, Bitbucket, and others. They all work with Git, just like you can share photos on Instagram, Facebook, or Twitter. But GitHub is the most popular with over 100 million developers!",
+    exampleCommand: "",
+    objective: "Know the difference between Git (the tool) and GitHub (the website)",
+    hint: "Git = tool on your computer. GitHub = website for sharing code online.",
+    practiceTask: "Remember: You need Git to use GitHub, but you don't need GitHub to use Git!",
+    isFoundation: true,
+    isPaid: false,
+    order: 15,
+    category: 'Git Concepts',
+  },
+  {
+    id: "foundation-repository",
+    title: "📁 What Is a Repository?",
+    description: "Learn about repositories - the heart of every Git project",
+    explanation:
+      "**A Repository is a Project Folder**\nA repository (or 'repo' for short) is simply a folder on your computer that Git is watching. Inside this folder, you keep all your project files - code, images, documents, whatever you need! The special part? Git tracks every change made to files in this folder.\n\n**The Hidden .git Folder**\nWhen you tell Git to watch a folder, it creates a hidden folder inside called '.git'. This is where Git stores all the history and information about your project. You'll never need to touch this folder directly - Git manages it automatically. But it's important to know it exists! Delete this folder, and Git forgets everything about your project's history.\n\n💡 **Real-Life Example:** Think of a repository like a school notebook. The pages are your code files, and Git is like someone who takes photos of every page whenever you make changes. The .git folder is like a pocket in the notebook where all those photos are stored!\n\n**Local vs Remote Repositories:**\n• **Local repository:** On your computer - it's your personal copy\n• **Remote repository:** Stored on a server (like GitHub) - it's the shared copy everyone can access\n\nYou can work on your local repository even without internet, then later 'push' your changes to the remote repository to share with others!",
+    exampleCommand: "",
+    objective: "Understand that a repository is a tracked project folder with a hidden .git folder",
+    hint: "Repository = Your project folder + Git's magic .git folder inside it",
+    practiceTask: "Imagine your project folder as a notebook that Git is photographing - that's a repository!",
+    isFoundation: true,
+    isPaid: false,
+    order: 16,
+    category: 'Git Concepts',
+  },
+  {
+    id: "foundation-snapshots",
+    title: "📸 How Git Tracks Changes",
+    description: "Discover how Git uses snapshots to remember your project's history",
+    explanation:
+      "**Git Takes Photos of Your Project**\nGit doesn't track every single change as you type. Instead, it works like a camera - YOU decide when to take a photo (called a 'commit') of your project. Each commit is a snapshot of your entire project at that moment. You can go back and look at any snapshot anytime!\n\n**Why Snapshots Are Powerful**\nLet's say you're building a website. You take a snapshot when the homepage is done. Then you work on the contact page. If something breaks, you can instantly go back to that earlier snapshot where everything worked! Unlike 'Save As' which creates full copies and wastes space, Git is smart - it only stores what changed between snapshots.\n\n💡 **Real-Life Example:** Think of building with LEGO blocks. Every time you finish a major section (like a wall or a room), you take a photo. If you mess up later, you can look at the photos and rebuild to that exact point. Git does this with code!\n\n**Commits Have Messages**\nEvery snapshot (commit) comes with a short message describing what you did. Like 'Added login button' or 'Fixed navigation menu'. These messages help you (and others) understand the project's history. It's like writing captions for your photos!",
+    exampleCommand: "",
+    objective: "Understand that Git saves snapshots (commits) of your project at specific moments",
+    hint: "Commit = Snapshot + Message. You decide when to save a checkpoint!",
+    practiceTask: "Think about when you'd want to save a checkpoint in your project - that's when you commit!",
+    isFoundation: true,
+    isPaid: false,
+    order: 11,
+    category: 'Git Concepts',
+  },
+  {
+    id: "foundation-terminology",
+    title: "📚 Important Git Terms",
+    description: "Master the essential vocabulary you'll use every day with Git",
+    explanation:
+      "Before you start using Git commands, let's learn the common words. Think of these as the basic ingredients in a recipe!\n\n**Repository (Repo):** Your project folder that Git is tracking\n\n**Commit:** A snapshot of your project at a specific time. When you 'commit' changes, you're saving a checkpoint\n\n**Branch:** A parallel version of your project. Think of it like a fork in the road - you can try new ideas on a branch without affecting the main path. Later, you can merge branches back together\n\n💡 **Branch Analogy:** Imagine a choose-your-own-adventure book. The main story is the 'main branch,' but you can explore different paths (branches) and see where they lead. If you like a path, you can make it part of the main story!\n\n**Clone:** Copying a repository from somewhere (like GitHub) to your computer\n\n**Push:** Sending your local changes to a remote repository (like GitHub). It's like uploading your work\n\n**Pull:** Downloading changes from a remote repository to your computer. If someone else updated the project, you 'pull' their changes\n\n**Merge:** Combining changes from different branches. If you and a friend both worked on different features, merging brings them together\n\n**Staging Area:** A temporary area where you prepare files before committing them. Think of it as a loading dock where you organize items before shipping them out!",
+    exampleCommand: "",
+    objective: "Learn the basic vocabulary that makes Git communication possible",
+    hint: "Don't memorize - these terms will become natural with practice!",
+    practiceTask: "Once you understand these terms, Git commands will make much more sense!",
+    isFoundation: true,
+    isPaid: false,
+    order: 12,
+    category: 'Git Concepts',
+  },
+  {
     id: 'help',
     title: 'Get Help in Git',
     description: 'Learn how to access Git help and documentation',
@@ -10,7 +100,8 @@ export const lessons: any[] = [
     hint: "Try 'git help status' to see help for a specific command",
     completionPattern: '^git help$',
     isPaid: false,
-    order: 1,
+    order: 7,
+    category: 'Getting Started',
   },
   {
     id: 'version',
@@ -22,7 +113,8 @@ export const lessons: any[] = [
     objective: 'Check the installed Git version',
     hint: 'If Git is installed correctly, it will show a version number',
     isPaid: false,
-    order: 2,
+    order: 8,
+    category: 'Getting Started',
   },
   {
     id: 'config',
@@ -36,7 +128,8 @@ export const lessons: any[] = [
     objective: 'Configure Git user identity',
     hint: 'Use your real name and a valid email address',
     isPaid: false,
-    order: 3,
+    order: 9,
+    category: 'Getting Started',
   },
 
   {
@@ -49,7 +142,8 @@ export const lessons: any[] = [
     objective: 'Initialize a new Git repository',
     hint: 'Run this command inside your project folder',
     isPaid: false,
-    order: 4,
+    order: 10,
+    category: 'Repository Management',
   },
 
   {
@@ -62,7 +156,8 @@ export const lessons: any[] = [
     objective: 'Clone a remote repository',
     hint: 'Replace the URL with a real repository link',
     isPaid: false,
-    order: 5,
+    order: 11,
+    category: 'Repository Management',
   },
 
   {
@@ -75,7 +170,8 @@ export const lessons: any[] = [
     objective: 'Understand the current state of your repository',
     hint: 'Run this command often to stay aware of changes',
     isPaid: false,
-    order: 6,
+    order: 12,
+    category: 'Working with Changes',
   },
 
   {
@@ -88,7 +184,8 @@ export const lessons: any[] = [
     objective: 'Stage files for committing',
     hint: "Use 'git add .' to stage all changes",
     isPaid: false,
-    order: 7,
+    order: 13,
+    category: 'Working with Changes',
   },
   {
     id: 'commit',
@@ -100,7 +197,8 @@ export const lessons: any[] = [
     objective: 'Create a commit with a message',
     hint: 'Write clear and meaningful commit messages',
     isPaid: false,
-    order: 8,
+    order: 14,
+    category: 'Working with Changes',
   },
   {
     id: 'push',
@@ -112,7 +210,8 @@ export const lessons: any[] = [
     objective: 'Push local commits to a remote repository',
     hint: 'Make sure you have a remote repository set',
     isPaid: false,
-    order: 9,
+    order: 15,
+    category: 'Remote Collaboration',
   },
   {
     id: 'pull',
@@ -124,6 +223,7 @@ export const lessons: any[] = [
     objective: 'Update your local repository with remote changes',
     hint: 'Pull often to stay up to date with the team',
     isPaid: false,
-    order: 10,
+    order: 16,
+    category: 'Remote Collaboration',
   },
 ];

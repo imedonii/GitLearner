@@ -47,7 +47,10 @@ model Leasons {
   level                Level                @relation(fields: [levelId], references: [id])
   isPaid               Boolean              @default(false)
   order                Int                  @default(0)
+  category             String?
   completionPattern    String?
+  practiceTask         String?
+  isFoundation         Boolean              @default(false)
   createdAt            DateTime             @default(now())
   updatedAt            DateTime             @updatedAt
   userLeasonProgresses UserLeasonProgress[]
