@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { GitBranch, Sparkles, Zap, Rocket, Lock, Check } from 'lucide-react'
 
-export type KnowledgeLevel = 'beginner' | 'mid' | 'pro'
+export type KnowledgeLevel = 'newbie' | 'beginner' | 'mid' | 'pro'
 
 interface KnowledgeLevelPageProps {
   onSelectLevel: (level: KnowledgeLevel) => void

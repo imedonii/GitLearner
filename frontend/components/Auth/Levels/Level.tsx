@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useUser } from '@/hooks/Auth/useUser'
 import AppTooltip from '@/components/UI/AppTooltip'
 
-export type KnowledgeLevel = 'beginner' | 'intermediate' | 'pro'
+export type KnowledgeLevel = 'newbie' | 'beginner' | 'mid' | 'pro'
 
 interface LevelCard {
   id: KnowledgeLevel
@@ -41,7 +41,7 @@ const levels: LevelCard[] = [
     slug: 'new_here',
   },
   {
-    id: 'intermediate',
+    id: 'mid',
     icon: Zap,
     title: 'I Know Things',
     subtitle: "I've used Git but want to improve",
@@ -236,6 +236,31 @@ export const Level = () => {
             )
           })}
         </div>
+
+        {/* Continue Button */}
+        <div className="flex justify-center mt-8">
+          <button
+            onClick={handleContinue}
+            disabled={!selectedLevel || isLoading}
+            className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-800 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors flex items-center gap-2"
+          >
+            {isLoading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Setting up your path...
+              </>
+            ) : (
+              'Continue'
+            )}
+          </button>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <p className="text-center text-sm text-red-400 mt-4">
+            {error}
+          </p>
+        )}
 
         {/* Help Text */}
         <p className="text-center text-sm text-slate-500 mt-6">

@@ -3,7 +3,7 @@ import { QUERY_KEY } from '../queryKeys'
 import { axiosInstance } from '@/api'
 
 export interface Level {
-  id: number
+  id: string
   name: string
   slug: string
 }

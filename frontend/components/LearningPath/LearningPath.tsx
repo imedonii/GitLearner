@@ -16,6 +16,7 @@ import Terminal from './Terminal'
 import LessonPanel from './LessonPanel'
 import { executeGitCommand, GitState, initialGitState } from '@/utils'
 import { useLessons } from '@/hooks/Lessons/useLessons'
+import { useLevels } from '@/hooks/Levels/useLevels'
 import { QUERY_KEY } from '@/hooks/queryKeys'
 import Sidebar from './Sidebar'
 import { Header } from './Header/Header'
@@ -29,6 +30,7 @@ export const LearningPath = () => {
   const router = useRouter()
   const queryClient = useQueryClient()
   const { lessons, isLoading, isError, updateLesson, completeLesson, isUpdating } = useLessons()
+  const { levels } = useLevels()
   const { addNotification } = useNotifications()
   const [currentLessonId, setCurrentLessonId] = useState<string | null>(null)
   const [gitState, setGitState] = useState<GitState>(initialGitState)
@@ -64,14 +66,24 @@ export const LearningPath = () => {
 
   // Set current lesson ID on initial load or when lessons change
   useEffect(() => {
-    if (lessons && lessons.length > 0 && !currentLessonId) {
-      // Find the first incomplete lesson
-      const firstIncomplete = lessons.find(l => !l.completed)
-      if (firstIncomplete) {
-        setCurrentLessonId(firstIncomplete.id)
-      } else {
-        // All completed, go to first
-        setCurrentLessonId(lessons[0].id)
+    if (lessons && lessons.length > 0) {
+      // Always ensure current lesson is unlocked
+      const currentLesson = lessons.find(l => l.id === currentLessonId)
+      if (currentLesson && currentLesson.locked) {
+        // If current lesson is locked, switch to first unlocked
+        const firstUnlocked = lessons.find(l => !l.locked)
+        if (firstUnlocked) {
+          setCurrentLessonId(firstUnlocked.id)
+        }
+      } else if (!currentLessonId) {
+        // No current lesson set, find first unlocked
+        const firstUnlocked = lessons.find(l => !l.locked)
+        if (firstUnlocked) {
+          setCurrentLessonId(firstUnlocked.id)
+        } else {
+          // If all locked, go to first lesson (shouldn't happen)
+          setCurrentLessonId(lessons[0].id)
+        }
       }
     }
   }, [lessons, currentLessonId])
@@ -144,7 +156,7 @@ export const LearningPath = () => {
   // Map backend lessons to sidebar items with progress from backend
   const lessonItems = Array.isArray(lessons)
     ? lessons.map((lesson) => {
-        const level = levelSlugToKey(lesson.levelId) as 'beginner' | 'mid' | 'pro'
+        const level = lesson.levelSlug
 
         return {
           id: lesson.id,
@@ -153,6 +165,8 @@ export const LearningPath = () => {
           locked: lesson.locked,
           level,
           description: lesson.description,
+          category: lesson.category,
+          order: lesson.order,
         }
       })
     : []
@@ -316,7 +330,7 @@ export const LearningPath = () => {
         onPlayground={onPlayground}
         onCheatSheet={onCheatSheet}
         onHelpAndTips={onHelpAndTips}
-        userLevel={levelSlugToKey(user?.level?.slug)}
+        userLevel={user?.level?.slug}
         subscribed={user?.subscribed ?? false}
       />
 

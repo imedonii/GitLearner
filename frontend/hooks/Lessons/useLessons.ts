@@ -12,8 +12,12 @@ export interface Lesson {
   hint: string
   objective: string
   levelId: string
+  levelSlug: string
   order: number
+  category?: string
   completionPattern?: string
+  practiceTask?: string
+  isFoundation?: boolean
   createdAt: string
   updatedAt: string
   completed: boolean

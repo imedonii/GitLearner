@@ -14,8 +14,12 @@ export interface LessonWithProgress {
   hint: string;
   objective: string;
   levelId: string;
+  levelSlug: string;
   order: number;
+  category?: string | null;
   completionPattern?: string;
+  practiceTask?: string | null;
+  isFoundation?: boolean;
   createdAt: Date;
   updatedAt: Date;
   completed: boolean;
@@ -112,8 +116,12 @@ export class LeasonsService {
         hint: lesson.hint,
         objective: lesson.objective,
         levelId: lesson.levelId,
+        levelSlug: lesson.level.slug,
         order: lesson.order,
+        category: lesson.category,
         completionPattern: completionPatterns[lesson.slug] || undefined,
+        practiceTask: lesson.practiceTask,
+        isFoundation: lesson.isFoundation,
         createdAt: lesson.createdAt,
         updatedAt: lesson.updatedAt,
         completed: isCompleted,
