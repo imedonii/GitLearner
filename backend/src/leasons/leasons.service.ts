@@ -53,21 +53,45 @@ export class LeasonsService {
     return this.prisma.leasons.delete({ where: { id } });
   }
 
-  async findWithProgress(userId: string, levelId?: string): Promise<LessonWithProgress[]> {
+  async findWithProgress(userId: string, levelId?: string, userLevelSlug?: string): Promise<LessonWithProgress[]> {
     const whereClause: any = {};
     if (levelId) {
       whereClause.levelId = levelId;
     }
 
+    // Get all lessons - no level filtering
     const lessons = await this.prisma.leasons.findMany({
       where: whereClause,
       include: {
         level: true,
       },
-      orderBy: {
-        order: 'asc',
-      },
+      orderBy: [
+        {
+          level: {
+            id: 'asc',
+          },
+        },
+        {
+          order: 'asc',
+        },
+      ],
     });
+
+    if (!lessons || lessons.length === 0) {
+      return [];
+    }
+
+    // Get user's level if not provided
+    let currentUserLevelSlug = userLevelSlug;
+    if (!currentUserLevelSlug) {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { level: { select: { slug: true } } },
+      });
+      currentUserLevelSlug = user?.level?.slug || 'newbie';
+    }
+
+    console.log(`findWithProgress: userId=${userId}, userLevelSlug=${currentUserLevelSlug}`);
 
     if (!lessons || lessons.length === 0) {
       return [];
@@ -83,8 +107,10 @@ export class LeasonsService {
     });
 
     const progressMap = new Map(
-      userProgress.map((p) => [p.leasonId, p.isCompleted]),
+      userProgress.map((p) => [p.leasonId, p.isCompleted])
     );
+
+    console.log(`findWithProgress: progressMap has ${progressMap.size} entries`);
 
     // Define completion patterns for each lesson slug
     const completionPatterns: Record<string, string> = {
@@ -125,8 +151,13 @@ export class LeasonsService {
         createdAt: lesson.createdAt,
         updatedAt: lesson.updatedAt,
         completed: isCompleted,
-        locked: !this.isLessonUnlocked(lesson.id, lessons, progressMap),
+        locked: !this.isLessonUnlocked(lesson.id, lessons, progressMap, currentUserLevelSlug),
       };
+    });
+
+    console.log(`findWithProgress: returning ${lessonsWithLock.length} lessons`);
+    lessonsWithLock.forEach(l => {
+      console.log(`  ${l.order}. ${l.title} - Level: ${l.levelSlug}, Locked: ${l.locked}, Completed: ${l.completed}`);
     });
 
     return lessonsWithLock;
@@ -135,15 +166,50 @@ export class LeasonsService {
   private isLessonUnlocked(
     lessonId: string,
     lessons: any[],
-    progressMap: Map<string, boolean>
+    progressMap: Map<string, boolean>,
+    userLevelSlug: string
   ): boolean {
-    const currentIndex = lessons.findIndex((l) => l.id === lessonId);
+    const currentLesson = lessons.find((l) => l.id === lessonId);
+    if (!currentLesson) return false;
 
-    if (currentIndex === 0) {
+    const currentLessonLevelSlug = currentLesson.level?.slug;
+
+    // Define level order for access control
+    const levelOrder = ['newbie', 'beginner', 'mid', 'pro'];
+    const currentLevelIndex = levelOrder.indexOf(currentLessonLevelSlug);
+    const userLevelIndex = levelOrder.indexOf(userLevelSlug);
+
+    console.log(`isLessonUnlocked: lessonId=${lessonId}, lessonSlug=${currentLessonLevelSlug}, userLevelSlug=${userLevelSlug}, currentLevelIndex=${currentLevelIndex}, userLevelIndex=${userLevelIndex}`);
+
+    // Lesson is locked if it's in a level different from user's current level
+    if (currentLevelIndex !== userLevelIndex) {
+      console.log(`isLessonUnlocked: LOCKED - level mismatch`);
+      return false;
+    }
+
+    // Get all lessons in same level and sort by order, then by id for determinism
+    const levelLessons = lessons
+      .filter((l) => l.level?.slug === currentLessonLevelSlug)
+      .sort((a, b) => {
+        if (a.order !== b.order) {
+          return a.order - b.order;
+        }
+        return a.id.localeCompare(b.id);
+      });
+
+    const currentIndexInLevel = levelLessons.findIndex((l) => l.id === lessonId);
+    console.log(`isLessonUnlocked: currentIndexInLevel=${currentIndexInLevel}, totalLessonsInLevel=${levelLessons.length}`);
+
+    // First lesson in the level is always unlocked
+    if (currentIndexInLevel === 0) {
+      console.log(`isLessonUnlocked: UNLOCKED - first lesson in level`);
       return true;
     }
 
-    const previousLesson = lessons[currentIndex - 1];
-    return progressMap.get(previousLesson.id) === true;
+    // Other lessons are unlocked only if previous lesson is completed
+    const previousLesson = levelLessons[currentIndexInLevel - 1];
+    const previousCompleted = progressMap.get(previousLesson.id) === true;
+    console.log(`isLessonUnlocked: ${previousCompleted ? 'UNLOCKED' : 'LOCKED'} - previous lesson ${previousCompleted ? 'completed' : 'not completed'}`);
+    return previousCompleted;
   }
 }

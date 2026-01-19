@@ -23,23 +23,23 @@ type Lesson = ApiLesson & {
 interface LessonPanelProps {
   lesson?: Lesson
   onComplete?: () => void
-  showCompleteButton?: boolean
   className?: string
   isLoading: boolean
   isError: boolean
   updateLesson: (id: string, data: Partial<ApiLesson>) => Promise<ApiLesson>
   isUpdating: boolean
+  level: string
 }
 
 export default function LessonPanel({
   lesson: initialLesson,
   onComplete,
-  showCompleteButton = false,
   className = '',
   isLoading,
   isError: error,
   updateLesson,
   isUpdating,
+  level,
 }: LessonPanelProps) {
   const [lesson, setLesson] = useState<Lesson | null>(initialLesson || null)
   const [isCompleting, setIsCompleting] = useState(false)
@@ -124,13 +124,13 @@ export default function LessonPanel({
           </div>
 
           {/* Complete Button */}
-          {showCompleteButton && onComplete && !lesson.completed && (
+          {!lesson?.completed && level === 'newbie' && (
             <Button
-              onClick={handleComplete}
+              onClick={onComplete}
               className="w-1/6 bg-emerald-500 hover:bg-emerald-600"
-              disabled={isCompleting || isUpdating}
+              disabled={isUpdating}
             >
-              {isCompleting ? (
+              {isUpdating ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Marking as Complete...

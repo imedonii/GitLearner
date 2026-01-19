@@ -24,13 +24,18 @@ interface useUserProps {
 }
 
 // Maps backend level slugs to frontend config keys
-export const levelSlugToKey = (slug: string | null | undefined): 'beginner' | 'mid' | 'pro' => {
-  const mapping: Record<string, 'beginner' | 'mid' | 'pro'> = {
-    'new_here': 'beginner',
-    'i_know_things': 'mid',
-    'pro_level': 'pro',
+export const levelSlugToKey = (
+  slug: string | null | undefined
+): 'newbie' | 'beginner' | 'mid' | 'pro' => {
+  const mapping: Record<string, 'newbie' | 'beginner' | 'mid' | 'pro'> = {
+    newbie: 'newbie',
+    beginner: 'beginner',
+    mid: 'mid',
+    pro: 'pro',
   }
-  return mapping[slug || ''] || 'beginner'
+  const result = mapping[slug || ''] || 'newbie'
+  console.log('levelSlugToKey:', { input: slug, output: result })
+  return result
 }
 
 async function getUser(): Promise<User | null> {

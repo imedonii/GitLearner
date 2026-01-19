@@ -24,69 +24,35 @@ interface LevelCard {
 
 const levels: LevelCard[] = [
   {
-    id: 'beginner',
+    id: 'newbie',
     icon: Sparkles,
-    title: 'Beginner',
-    subtitle: "I'm new to Git or just starting",
-    description: 'Structured learning path with step-by-step guidance',
+    title: 'Newbie',
+    subtitle: "I'm completely new to Git",
+    description: 'Start from the very basics with gentle introductions',
     features: [
-      'Locked learning path',
-      'Must complete lessons in order',
-      'Guided terminal practice',
-      'Detailed explanations',
+      'Conceptual foundations',
+      'No terminal required initially',
+      'Step-by-step explanations',
+      'Perfect for absolute beginners',
     ],
-    color: 'from-green-500 to-emerald-500',
-    iconColor: 'text-green-400',
-    borderColor: 'border-green-500/50',
-    slug: 'new_here',
-  },
-  {
-    id: 'mid',
-    icon: Zap,
-    title: 'I Know Things',
-    subtitle: "I've used Git but want to improve",
-    description: 'Flexible learning with all lessons unlocked',
-    features: [
-      'All lessons unlocked',
-      'Free navigation',
-      'Practice at your pace',
-      'Track your progress',
-    ],
-    color: 'from-yellow-500 to-orange-500',
-    iconColor: 'text-yellow-400',
-    borderColor: 'border-yellow-500/50',
-    slug: 'i_know_things',
-  },
-  {
-    id: 'pro',
-    icon: Rocket,
-    title: 'Pro',
-    subtitle: 'I use Git daily',
-    description: 'Full access with advanced topics and challenges',
-    features: [
-      'Full access to everything',
-      'Advanced topics',
-      'Jump to any command',
-      'Challenge mode',
-    ],
-    color: 'from-red-500 to-pink-500',
-    iconColor: 'text-red-400',
-    borderColor: 'border-red-500/50',
-    slug: 'pro_level',
+    color: 'from-blue-500 to-cyan-500',
+    iconColor: 'text-blue-400',
+    borderColor: 'border-blue-500/50',
+    slug: 'newbie',
   },
 ]
 
 export const Level = () => {
   const router = useRouter()
   const { user } = useUser()
-  const [selectedLevel, setSelectedLevel] = useState<KnowledgeLevel>('beginner')
+  const [selectedLevel, setSelectedLevel] = useState<KnowledgeLevel>('newbie')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [lockedLevelTooltip, setLockedLevelTooltip] =
     useState<KnowledgeLevel | null>(null)
 
   const isLevelLocked = (levelId: KnowledgeLevel) => {
-    return !user?.subscribed && levelId !== 'beginner'
+    return levelId !== 'newbie' // Only newbie is available for new users
   }
 
   const handleContinue = async () => {
@@ -150,7 +116,7 @@ export const Level = () => {
         </div>
 
         {/* Level Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
           {levels.map((level, index) => {
             const Icon = level.icon
             const isSelected = selectedLevel === level.id
@@ -264,7 +230,7 @@ export const Level = () => {
 
         {/* Help Text */}
         <p className="text-center text-sm text-slate-500 mt-6">
-          Other levels will be available soon
+          Higher levels unlock as you complete your current level
         </p>
       </motion.div>
     </div>

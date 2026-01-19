@@ -130,7 +130,7 @@ export default function Sidebar({
   const [lessonTooltip, setLessonTooltip] = useState<string | null>(null)
 
   const isLevelPremium = (levelSlug: string) => {
-    return !subscribed && (levelSlug === 'i_know_things' || levelSlug === 'pro_level')
+    return !subscribed && (levelSlug === 'mid' || levelSlug === 'pro')
   }
 
 
@@ -358,7 +358,7 @@ export default function Sidebar({
                                   <span className="text-xs">{levelEmoji}</span>
                                   <span className="text-xs text-slate-500">
                                     Lesson{' '}
-                                    {lessons.findIndex(
+                                    {group.lessons.findIndex(
                                       (l) => l.id === lesson.id
                                     ) + 1}
                                   </span>

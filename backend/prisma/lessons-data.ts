@@ -241,4 +241,112 @@ export const lessons: any[] = [
     order: 10,
     category: 'Remote Collaboration',
   },
+
+  // Mid Level: Branching and Merging
+  {
+    id: 'branch',
+    title: 'Create and Manage Branches',
+    description: 'Learn how to create branches for feature development',
+    explanation:
+      "Branches let you work on new features without affecting the main codebase. Create a branch, make changes, then merge back when ready.",
+    exampleCommand: 'git branch feature-login\ngit checkout feature-login',
+    objective: 'Create and switch between branches',
+    hint: 'Use descriptive branch names like feature-xyz or bugfix-abc',
+    isPaid: true,
+    order: 1,
+    category: 'Branching',
+  },
+  {
+    id: 'checkout',
+    title: 'Switch Between Branches',
+    description: 'Navigate between different branches in your repository',
+    explanation:
+      "The 'git checkout' command switches to a different branch. You can also use 'git switch' which is clearer for switching branches.",
+    exampleCommand: 'git checkout main\ngit checkout -b new-feature',
+    objective: 'Switch between branches and create new ones',
+    hint: 'git switch is preferred over git checkout for branch switching',
+    isPaid: true,
+    order: 2,
+    category: 'Branching',
+  },
+  {
+    id: 'merge',
+    title: 'Merge Branches',
+    description: 'Combine changes from different branches',
+    explanation:
+      "Merging brings changes from one branch into another. Use this to integrate completed features back into the main branch.",
+    exampleCommand: 'git checkout main\ngit merge feature-branch',
+    objective: 'Merge branch changes into the current branch',
+    hint: 'Always pull latest changes before merging',
+    isPaid: true,
+    order: 3,
+    category: 'Branching',
+  },
+  {
+    id: 'log',
+    title: 'View Commit History',
+    description: 'Explore your repository\'s commit timeline',
+    explanation:
+      "The 'git log' command shows the history of commits. Use --oneline for a compact view or --graph to see branch structure.",
+    exampleCommand: 'git log --oneline --graph',
+    objective: 'View and understand commit history',
+    hint: 'Add --all to see all branches, not just current',
+    isPaid: true,
+    order: 4,
+    category: 'History',
+  },
+
+  // Pro Level: Advanced Git
+  {
+    id: 'rebase',
+    title: 'Rebase for Clean History',
+    description: 'Rewrite commit history to keep it clean and linear',
+    explanation:
+      "Rebasing lets you rewrite history by replaying commits on top of another base. This creates a cleaner, linear history.",
+    exampleCommand: 'git rebase main',
+    objective: 'Use rebase to maintain clean commit history',
+    hint: 'Never rebase commits that have been pushed to shared branches',
+    isPaid: true,
+    order: 1,
+    category: 'Advanced',
+  },
+  {
+    id: 'stash',
+    title: 'Stash Changes Temporarily',
+    description: 'Temporarily save work in progress without committing',
+    explanation:
+      "The stash command saves your current changes and reverts to a clean working directory. Perfect for switching contexts quickly.",
+    exampleCommand: 'git stash\ngit stash pop',
+    objective: 'Temporarily save and restore changes',
+    hint: 'Use stash when you need to switch branches but have uncommitted changes',
+    isPaid: true,
+    order: 2,
+    category: 'Advanced',
+  },
+  {
+    id: 'reset',
+    title: 'Reset to Previous States',
+    description: 'Undo commits and restore repository state',
+    explanation:
+      "Reset moves the current branch to a different commit. Use carefully - this can rewrite history and cause issues for collaborators.",
+    exampleCommand: 'git reset --soft HEAD~1',
+    objective: 'Reset repository to a previous commit',
+    hint: 'Use --soft to keep changes staged, --hard to discard everything',
+    isPaid: true,
+    order: 3,
+    category: 'Advanced',
+  },
+  {
+    id: 'cherry-pick',
+    title: 'Cherry Pick Specific Commits',
+    description: 'Apply changes from specific commits to current branch',
+    explanation:
+      "Cherry-pick lets you apply the changes from a single commit to your current branch, without merging the entire branch.",
+    exampleCommand: 'git cherry-pick a1b2c3d',
+    objective: 'Apply individual commits to current branch',
+    hint: 'Useful for applying bug fixes from other branches',
+    isPaid: true,
+    order: 4,
+    category: 'Advanced',
+  },
 ];

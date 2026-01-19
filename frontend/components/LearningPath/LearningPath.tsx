@@ -20,7 +20,6 @@ import { useLevels } from '@/hooks/Levels/useLevels'
 import { QUERY_KEY } from '@/hooks/queryKeys'
 import Sidebar from './Sidebar'
 import { Header } from './Header/Header'
-import type { KnowledgeLevel } from './KnowledgeLevelPage'
 import { useUser, levelSlugToKey } from '@/hooks/Auth/useUser'
 import { useRouter } from 'next/navigation'
 import { useNotifications } from '@/components/UI/NotificationsProvider'
@@ -29,7 +28,14 @@ export const LearningPath = () => {
   const { user } = useUser()
   const router = useRouter()
   const queryClient = useQueryClient()
-  const { lessons, isLoading, isError, updateLesson, completeLesson, isUpdating } = useLessons()
+  const {
+    lessons,
+    isLoading,
+    isError,
+    updateLesson,
+    completeLesson,
+    isUpdating,
+  } = useLessons()
   const { levels } = useLevels()
   const { addNotification } = useNotifications()
   const [currentLessonId, setCurrentLessonId] = useState<string | null>(null)
@@ -42,11 +48,20 @@ export const LearningPath = () => {
   const [totalCommits, setTotalCommits] = useState(0)
   const [achievements, setAchievements] = useState(initialAchievements)
 
-  const currentLevel = levelSlugToKey(user?.level?.slug) || 'beginner'
-  const lessonsInCurrentLevel = lessons?.filter(l => levelSlugToKey(l.levelId) === currentLevel) || []
-  const completedInCurrentLevel = lessonsInCurrentLevel.filter(l => l.completed).length
+  const currentLevel = levelSlugToKey(user?.level?.slug) || 'newbie'
+  console.log('DEBUG: currentLevel:', currentLevel, 'from user.level.slug:', user?.level?.slug)
+  console.log('DEBUG: all lessons:', lessons?.map(l => ({ id: l.id, title: l.title, levelSlug: l.levelSlug, locked: l.locked })))
+  const lessonsInCurrentLevel =
+    lessons?.filter((l) => levelSlugToKey(l.levelSlug) === currentLevel) || []
+  console.log('DEBUG: lessonsInCurrentLevel:', lessonsInCurrentLevel.map(l => ({ id: l.id, title: l.title, locked: l.locked })))
+  const completedInCurrentLevel = lessonsInCurrentLevel.filter(
+    (l) => l.completed
+  ).length
   const totalInCurrentLevel = lessonsInCurrentLevel.length
-  const progressPercentage = totalInCurrentLevel > 0 ? (completedInCurrentLevel / totalInCurrentLevel) * 100 : 0
+  const progressPercentage =
+    totalInCurrentLevel > 0
+      ? (completedInCurrentLevel / totalInCurrentLevel) * 100
+      : 0
 
   const onPlayground = () => {
     router.push('/playground')
@@ -67,31 +82,42 @@ export const LearningPath = () => {
   // Set current lesson ID on initial load or when lessons change
   useEffect(() => {
     if (lessons && lessons.length > 0) {
+      console.log('DEBUG: lessons:', lessons.map(l => ({ id: l.id, title: l.title, levelSlug: l.levelSlug, locked: l.locked })))
+      console.log('DEBUG: currentLevel:', currentLevel)
+      console.log('DEBUG: user?.level?.slug:', user?.level?.slug)
+      console.log('DEBUG: currentLessonId (before):', currentLessonId)
       // Always ensure current lesson is unlocked
-      const currentLesson = lessons.find(l => l.id === currentLessonId)
+      const currentLesson = lessons.find((l) => l.id === currentLessonId)
       if (currentLesson && currentLesson.locked) {
-        // If current lesson is locked, switch to first unlocked
-        const firstUnlocked = lessons.find(l => !l.locked)
+        // If current lesson is locked, switch to first unlocked in current level, then any unlocked
+        const firstUnlockedInLevel = lessons.find((l) => !l.locked && levelSlugToKey(l.levelSlug) === currentLevel)
+        const firstUnlocked = firstUnlockedInLevel || lessons.find((l) => !l.locked)
+        console.log('DEBUG: current lesson is locked, firstUnlockedInLevel:', firstUnlockedInLevel, 'firstUnlocked:', firstUnlocked)
         if (firstUnlocked) {
+          console.log('DEBUG: Setting currentLessonId to:', firstUnlocked.id)
           setCurrentLessonId(firstUnlocked.id)
         }
       } else if (!currentLessonId) {
-        // No current lesson set, find first unlocked
-        const firstUnlocked = lessons.find(l => !l.locked)
+        // No current lesson set, find first unlocked in current level, then any unlocked
+        const firstUnlockedInLevel = lessons.find((l) => !l.locked && levelSlugToKey(l.levelSlug) === currentLevel)
+        const firstUnlocked = firstUnlockedInLevel || lessons.find((l) => !l.locked)
+        console.log('DEBUG: currentLessonId is null, firstUnlockedInLevel:', firstUnlockedInLevel, 'firstUnlocked:', firstUnlocked)
         if (firstUnlocked) {
+          console.log('DEBUG: Setting currentLessonId to:', firstUnlocked.id)
           setCurrentLessonId(firstUnlocked.id)
         } else {
           // If all locked, go to first lesson (shouldn't happen)
+          console.log('DEBUG: All lessons locked, setting to lessons[0].id:', lessons[0].id)
           setCurrentLessonId(lessons[0].id)
         }
       }
     }
-  }, [lessons, currentLessonId])
+  }, [lessons, currentLessonId, currentLevel])
 
   // Update user level when current level is completed
   useEffect(() => {
     if (progressPercentage === 100 && currentLevel !== 'pro' && user) {
-      const nextLevelSlug = currentLevel === 'beginner' ? 'i_know_things' : 'pro_level'
+      const nextLevelSlug = currentLevel === 'beginner' ? 'mid' : 'pro'
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/set-level`, {
         method: 'POST',
         headers: {
@@ -105,7 +131,9 @@ export const LearningPath = () => {
           addNotification({
             type: 'success',
             title: 'Level Up!',
-            description: `Congratulations! You've advanced to ${nextLevelSlug === 'i_know_things' ? 'I Know Things' : 'Pro'} level.`,
+            description: `Congratulations! You've advanced to ${
+              nextLevelSlug === 'mid' ? 'I Know Things' : 'Pro'
+            } level.`,
           })
         })
         .catch(() => {
@@ -170,8 +198,6 @@ export const LearningPath = () => {
         }
       })
     : []
-
-
 
   const handleCommand = (command: string) => {
     const result = executeGitCommand(command, gitState)
@@ -240,38 +266,46 @@ export const LearningPath = () => {
 
     if (!activeLesson) return
 
-    const pattern = activeLesson.completionPattern ? new RegExp(activeLesson.completionPattern) : null
+    const pattern = activeLesson.completionPattern
+      ? new RegExp(activeLesson.completionPattern)
+      : null
     if (pattern && pattern.test(command) && !activeLesson.completed) {
-      try {
-        await completeLesson(currentLessonId, activeLesson.levelId)
-        handleCompleteLesson()
-      } catch (error) {
-        console.error('Error completing lesson:', error)
-      }
-   }
+      handleCompleteLesson()
+    }
   }
 
-  const handleCompleteLesson = () => {
-    if (!currentLessonId) return
+  const handleCompleteLesson = async () => {
+    if (!currentLesson) return
 
-    addNotification({
-      type: 'success',
-      title: 'Lesson Completed!',
-      description: 'Great job! Moving to the next lesson.',
-      duration: 3000
-    })
+    try {
+      await completeLesson(currentLesson.id, currentLesson.levelId)
 
-    // Auto-advance to next lesson after 1.5 seconds
-    setTimeout(() => {
-      if (!currentLessonId || !lessons || lessons.length === 0) return
+      addNotification({
+        type: 'success',
+        title: 'Lesson Completed!',
+        description: `You've successfully completed "${currentLesson.title}". Keep up the great work!`,
+      })
 
-      const currentIndex = lessons.findIndex((l) => l.id === currentLessonId)
-      if (currentIndex < lessons.length - 1) {
-        const nextLesson = lessons[currentIndex + 1]
-        // Advance to next lesson (it should be unlocked now)
-        setCurrentLessonId(nextLesson.id)
-      }
-    }, 1500)
+      // Auto-advance to next lesson after 1.5 seconds
+      setTimeout(() => {
+        if (!currentLessonId || !lessons || lessons.length === 0) return
+
+        const currentIndex = lessons.findIndex((l) => l.id === currentLessonId)
+        if (currentIndex < lessons.length - 1) {
+          const nextLesson = lessons[currentIndex + 1]
+          if (nextLesson && !nextLesson.locked) {
+            setCurrentLessonId(nextLesson.id)
+          }
+        }
+      }, 1500)
+    } catch (error) {
+      console.error('Error completing lesson:', error)
+      addNotification({
+        type: 'error',
+        title: 'Error',
+        description: 'Failed to mark lesson as complete. Please try again.',
+      })
+    }
   }
 
   const handleLessonSelect = (id: string) => {
@@ -306,144 +340,147 @@ export const LearningPath = () => {
         progressPercentage={progressPercentage}
         gitLevel={currentLevel}
         onShowAchievements={() => setShowAchievements(true)}
-        achievementsCount={{ unlocked: achievements.filter(a => a.unlocked).length, total: achievements.length }}
+        achievementsCount={{
+          unlocked: achievements.filter((a) => a.unlocked).length,
+          total: achievements.length,
+        }}
       />
       <div className="flex-1 bg-slate-950 pt-20">
-      {/* Achievement Toast */}
-      {newlyUnlockedAchievement && (
-        <AchievementToast achievement={newlyUnlockedAchievement} />
-      )}
+        {/* Achievement Toast */}
+        {newlyUnlockedAchievement && (
+          <AchievementToast achievement={newlyUnlockedAchievement} />
+        )}
 
-      {/* Achievements Modal */}
-      {showAchievements && (
-        <AchievementsModal
-          achievements={achievements || []}
-          onClose={() => setShowAchievements(false)}
+        {/* Achievements Modal */}
+        {showAchievements && (
+          <AchievementsModal
+            achievements={achievements || []}
+            onClose={() => setShowAchievements(false)}
+          />
+        )}
+
+        <Sidebar
+          lessons={lessonItems}
+          currentLessonId={currentLessonId ?? lessonItems[0]?.id}
+          onLessonSelect={handleLessonSelect}
+          onGoHome={onGoHome}
+          onPlayground={onPlayground}
+          onCheatSheet={onCheatSheet}
+          onHelpAndTips={onHelpAndTips}
+          userLevel={user?.level?.slug}
+          subscribed={user?.subscribed ?? false}
         />
-      )}
 
-      <Sidebar
-        lessons={lessonItems}
-        currentLessonId={currentLessonId ?? lessonItems[0]?.id}
-        onLessonSelect={handleLessonSelect}
-        onGoHome={onGoHome}
-        onPlayground={onPlayground}
-        onCheatSheet={onCheatSheet}
-        onHelpAndTips={onHelpAndTips}
-        userLevel={user?.level?.slug}
-        subscribed={user?.subscribed ?? false}
-      />
+        {/* Main Content Area - with margin for fixed sidebar, entire page scrollable */}
+        <div className="flex-1 ml-80 overflow-y-auto">
+          <div className="min-h-screen flex flex-col">
+            {/* Lesson Panel */}
+            <div className="p-4 border-b border-slate-700 bg-slate-900">
+              <LessonPanel
+                lesson={currentLesson ?? undefined}
+                onComplete={handleCompleteLesson}
+                updateLesson={updateLesson}
+                isUpdating={isUpdating}
+                isLoading={isLoading}
+                isError={isError}
+                level={currentLesson?.levelSlug || 'newbie'}
+              />
+            </div>
 
-      {/* Main Content Area - with margin for fixed sidebar, entire page scrollable */}
-      <div className="flex-1 ml-80 overflow-y-auto">
-        <div className="min-h-screen flex flex-col">
-          {/* Lesson Panel */}
-          <div className="p-4 border-b border-slate-700 bg-slate-900">
-            <LessonPanel
-              showCompleteButton={false}
-              lesson={currentLesson ?? undefined}
-              onComplete={handleCompleteLesson}
-              updateLesson={updateLesson}
-              isUpdating={isUpdating}
-              isLoading={isLoading}
-              isError={isError}
-            />
-          </div>
+            {/* Main Content Area */}
+            <div className="flex-1 p-4 max-h-[80vh]">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Left: Terminal */}
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="flex flex-col h-[80vh]"
+                >
+                  <Terminal
+                    onCommand={handleCommand}
+                    currentPath={gitState.initialized ? '~/my-project' : '~'}
+                  />
+                </motion.div>
 
-          {/* Main Content Area */}
-          <div className="flex-1 p-4 max-h-[80vh]">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {/* Left: Terminal */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="flex flex-col h-[80vh]"
-              >
-                <Terminal
-                  onCommand={handleCommand}
-                  currentPath={gitState.initialized ? '~/my-project' : '~'}
-                />
-              </motion.div>
+                {/* Right: Visualization */}
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="flex flex-col gap-4"
+                >
+                  {showTwoComputer ? (
+                    <div className="bg-slate-900 rounded-lg border border-slate-700 p-4">
+                      <h2 className="text-lg font-bold mb-4 text-emerald-400">
+                        Remote Collaboration
+                      </h2>
+                      <TwoComputerSimulation
+                        localCommits={gitState.commits}
+                        remoteCommits={
+                          gitState.remotePushed ? gitState.commits : []
+                        }
+                        collaboratorCommits={[]}
+                        showPushAnimation={showPushAnimation}
+                        showPullAnimation={showPullAnimation}
+                      />
+                    </div>
+                  ) : (
+                    <div className="bg-slate-900 rounded-lg border border-slate-700 p-4">
+                      <h2 className="text-lg font-bold mb-4 text-emerald-400">
+                        Git Flow Visualization
+                      </h2>
+                      <GitFlowDiagram
+                        workingFiles={gitState.workingDirectory}
+                        stagedFiles={gitState.stagingArea}
+                        committedFiles={
+                          gitState.commits.length > 0
+                            ? [
+                                {
+                                  id: 'commits',
+                                  name: `${gitState.commits.length} commit(s)`,
+                                },
+                              ]
+                            : []
+                        }
+                        remotePushed={gitState.remotePushed}
+                        showRemote={false}
+                      />
+                    </div>
+                  )}
 
-              {/* Right: Visualization */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="flex flex-col gap-4"
-              >
-                {showTwoComputer ? (
+                  {/* Quick Stats */}
                   <div className="bg-slate-900 rounded-lg border border-slate-700 p-4">
-                    <h2 className="text-lg font-bold mb-4 text-emerald-400">
-                      Remote Collaboration
-                    </h2>
-                    <TwoComputerSimulation
-                      localCommits={gitState.commits}
-                      remoteCommits={
-                        gitState.remotePushed ? gitState.commits : []
-                      }
-                      collaboratorCommits={[]}
-                      showPushAnimation={showPushAnimation}
-                      showPullAnimation={showPullAnimation}
-                    />
+                    <h3 className="text-sm font-semibold text-slate-400 mb-3">
+                      Repository Status
+                    </h3>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <StatBox
+                        label="Branch"
+                        value={gitState.currentBranch}
+                        color="blue"
+                      />
+                      <StatBox
+                        label="Commits"
+                        value={gitState.commits.length.toString()}
+                        color="emerald"
+                      />
+                      <StatBox
+                        label="Staged"
+                        value={gitState.stagingArea.length.toString()}
+                        color="purple"
+                      />
+                      <StatBox
+                        label="Modified"
+                        value={gitState.workingDirectory.length.toString()}
+                        color="orange"
+                      />
+                    </div>
                   </div>
-                ) : (
-                  <div className="bg-slate-900 rounded-lg border border-slate-700 p-4">
-                    <h2 className="text-lg font-bold mb-4 text-emerald-400">
-                      Git Flow Visualization
-                    </h2>
-                    <GitFlowDiagram
-                      workingFiles={gitState.workingDirectory}
-                      stagedFiles={gitState.stagingArea}
-                      committedFiles={
-                        gitState.commits.length > 0
-                          ? [
-                              {
-                                id: 'commits',
-                                name: `${gitState.commits.length} commit(s)`,
-                              },
-                            ]
-                          : []
-                      }
-                      remotePushed={gitState.remotePushed}
-                      showRemote={false}
-                    />
-                  </div>
-                )}
-
-                {/* Quick Stats */}
-                <div className="bg-slate-900 rounded-lg border border-slate-700 p-4">
-                  <h3 className="text-sm font-semibold text-slate-400 mb-3">
-                    Repository Status
-                  </h3>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <StatBox
-                      label="Branch"
-                      value={gitState.currentBranch}
-                      color="blue"
-                    />
-                    <StatBox
-                      label="Commits"
-                      value={gitState.commits.length.toString()}
-                      color="emerald"
-                    />
-                    <StatBox
-                      label="Staged"
-                      value={gitState.stagingArea.length.toString()}
-                      color="purple"
-                    />
-                    <StatBox
-                      label="Modified"
-                      value={gitState.workingDirectory.length.toString()}
-                      color="orange"
-                    />
-                  </div>
-                </div>
-              </motion.div>
+                </motion.div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
     </>
   )
 }

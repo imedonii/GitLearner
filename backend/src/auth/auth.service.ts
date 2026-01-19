@@ -34,13 +34,20 @@ export class AuthService {
     const verificationCode = this.generateVerificationCode();
     const verificationCodeExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
+    // Set default level to 'newbie' if not provided
+    let levelId = dto.levelId;
+    if (!levelId) {
+      const newbieLevel = await this.levelsService.findBySlug('newbie');
+      levelId = newbieLevel?.id;
+    }
+
     const user = await this.prisma.user.create({
       data: {
         firstName: dto.firstName,
         lastName: dto.lastName,
         email: dto.email,
         password: hashedPassword,
-        levelId: dto.levelId,
+        levelId,
         verificationCode,
         verificationCodeExpiry,
       },

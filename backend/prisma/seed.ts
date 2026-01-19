@@ -20,6 +20,11 @@ const completionPatterns: Record<string, string> = {
   'push': '^git push',
   'pull': '^git pull',
   'clone': '^git clone https?:\\/\\/',
+  'merge': '^git merge',
+  'rebase': '^git rebase',
+  'stash': '^git stash',
+  'reset': '^git reset',
+  'cherry-pick': '^git cherry-pick',
 }
 
 const pool = new Pool({
@@ -34,9 +39,9 @@ async function main() {
   // 1️⃣ Seed Levels
   const levelsData = [
     { name: 'Newbie', slug: 'newbie' },
-    { name: 'New here', slug: 'new_here' },
-    { name: 'I know things', slug: 'i_know_things' },
-    { name: 'Pro', slug: 'pro_level' },
+    { name: 'Beginner', slug: 'beginner' },
+    { name: 'I Know Things', slug: 'mid' },
+    { name: 'Pro', slug: 'pro' },
   ];
 
   await prisma.level.createMany({
@@ -57,10 +62,12 @@ async function main() {
   };
 
   // 3️⃣ Seed Leasons from lessons array
-  for (const [index, lesson] of lessons.entries()) {
-    // Assign lessons to levels: 0-3: newbie, 4-7: new_here, 8-11: i_know_things, 12-15: pro_level
-    const levelSlugs = ['newbie', 'new_here', 'i_know_things', 'pro_level']
-    const levelSlug = levelSlugs[Math.floor(index / 4)];
+   for (const [index, lesson] of lessons.entries()) {
+     // Assign lessons to levels: 0-5: newbie, 6-15: beginner, 16-19: mid, 20-23: pro
+     let levelSlug = 'newbie';
+     if (index >= 6 && index < 16) levelSlug = 'beginner';
+     else if (index >= 16 && index < 20) levelSlug = 'mid';
+     else if (index >= 20) levelSlug = 'pro';
 
      await prisma.leasons.upsert({
        where: { slug: lesson.id }, // use your `slug` column

@@ -1,13 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  User,
-  Settings,
-  LogOut,
-  Sparkles,
-  Zap,
-  Rocket,
-} from 'lucide-react'
+import { User, Settings, LogOut, Sparkles, Zap, Rocket } from 'lucide-react'
 import ProfileSettingsModal from './ProfileSettingsModal'
 import type { User as UserType } from '@/hooks/Auth/useUser'
 import { levelSlugToKey } from '@/hooks/Auth/useUser'
@@ -17,10 +10,7 @@ interface UserProfileProps {
   onLogout: () => void
 }
 
-export default function UserProfile({
-  user,
-  onLogout,
-}: UserProfileProps) {
+export default function UserProfile({ user, onLogout }: UserProfileProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [showProfileSettings, setShowProfileSettings] = useState(false)
 
@@ -50,9 +40,13 @@ export default function UserProfile({
             <User className="w-4 h-4 text-white" />
           </div>
           <div className="text-left hidden sm:block">
-            <p className="text-sm font-medium text-white">{user.firstName} {user.lastName}</p>
+            <p className="text-sm font-medium text-white">
+              {user.firstName} {user.lastName}
+            </p>
             <p className="text-xs text-slate-400 flex items-center gap-1">
-              <CurrentLevelIcon className={`w-3 h-3 ${currentLevel?.color || 'text-green-400'}`} />
+              <CurrentLevelIcon
+                className={`w-3 h-3 ${currentLevel?.color || 'text-green-400'}`}
+              />
               {currentLevel?.label || 'Unknown'}
             </p>
           </div>
@@ -74,7 +68,9 @@ export default function UserProfile({
               >
                 {/* User Info */}
                 <div className="p-4 border-b border-slate-700">
-                  <p className="font-semibold text-white">{user.firstName} {user.lastName}</p>
+                  <p className="font-semibold text-white">
+                    {user.firstName} {user.lastName}
+                  </p>
                   <p className="text-sm text-slate-400">{user.email}</p>
                 </div>
 
