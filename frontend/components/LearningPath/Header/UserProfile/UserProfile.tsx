@@ -15,12 +15,9 @@ export default function UserProfile({ user, onLogout }: UserProfileProps) {
   const [showProfileSettings, setShowProfileSettings] = useState(false)
 
   const levelConfig = {
+    newbie: { icon: Sparkles, color: 'text-blue-400', label: 'Newbie' },
     beginner: { icon: Sparkles, color: 'text-green-400', label: 'Beginner' },
-    intermediate: {
-      icon: Zap,
-      color: 'text-yellow-400',
-      label: 'Intermediate',
-    },
+    mid: { icon: Zap, color: 'text-yellow-400', label: 'I Know Things' },
     pro: { icon: Rocket, color: 'text-red-400', label: 'Pro' },
   }
 

@@ -31,17 +31,23 @@ interface ProfileSettingsModalProps {
 }
 
 const levelConfig = {
+  newbie: {
+    icon: Sparkles,
+    color: 'text-blue-400',
+    bgColor: 'bg-blue-500/10',
+    label: 'Newbie',
+  },
   beginner: {
     icon: Sparkles,
     color: 'text-green-400',
     bgColor: 'bg-green-500/10',
     label: 'Beginner',
   },
-  intermediate: {
+  mid: {
     icon: Zap,
     color: 'text-yellow-400',
     bgColor: 'bg-yellow-500/10',
-    label: 'Intermediate',
+    label: 'I Know Things',
   },
   pro: {
     icon: Rocket,
@@ -170,8 +176,7 @@ export default function ProfileSettingsModal({
   const currentLevel = levelConfig[currentLevelKey]
   const CurrentLevelIcon = currentLevel?.icon || Sparkles
   const isPremiumLevel =
-    !user.subscribed &&
-    (currentLevelKey === 'intermediate' || currentLevelKey === 'pro')
+    !user.subscribed && (currentLevelKey === 'mid' || currentLevelKey === 'pro')
 
   // State for portal mounting
   const [mounted, setMounted] = useState(false)
