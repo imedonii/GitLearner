@@ -47,6 +47,7 @@ export const LearningPath = () => {
   const [showAchievements, setShowAchievements] = useState(false)
   const [totalCommits, setTotalCommits] = useState(0)
   const [achievements, setAchievements] = useState(initialAchievements)
+  const [isLevelUpgrading, setIsLevelUpgrading] = useState(false)
 
   const currentLevel = levelSlugToKey(user?.level?.slug) || 'newbie'
   const lessonsInCurrentLevel =
@@ -110,8 +111,24 @@ export const LearningPath = () => {
 
   // Update user level when current level is completed
   useEffect(() => {
-    if (progressPercentage === 100 && currentLevel !== 'pro' && user) {
-      const nextLevelSlug = currentLevel === 'beginner' ? 'mid' : 'pro'
+    if (
+      progressPercentage === 100 &&
+      currentLevel !== 'pro' &&
+      user &&
+      !isLevelUpgrading
+    ) {
+      setIsLevelUpgrading(true)
+
+      // Determine next level
+      let nextLevelSlug: 'newbie' | 'beginner' | 'mid' | 'pro' = 'beginner'
+      if (currentLevel === 'newbie') {
+        nextLevelSlug = 'beginner'
+      } else if (currentLevel === 'beginner') {
+        nextLevelSlug = 'mid'
+      } else if (currentLevel === 'mid') {
+        nextLevelSlug = 'pro'
+      }
+
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/set-level`, {
         method: 'POST',
         headers: {
@@ -120,13 +137,25 @@ export const LearningPath = () => {
         credentials: 'include',
         body: JSON.stringify({ levelSlug: nextLevelSlug }),
       })
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error('Failed to update level')
+          }
+          return res.json()
+        })
         .then(() => {
           queryClient.invalidateQueries({ queryKey: [QUERY_KEY.user] })
           addNotification({
             type: 'success',
             title: 'Level Up!',
             description: `Congratulations! You've advanced to ${
-              nextLevelSlug === 'mid' ? 'I Know Things' : 'Pro'
+              nextLevelSlug === 'beginner'
+                ? 'Beginner'
+                : nextLevelSlug === 'mid'
+                ? 'I Know Things'
+                : nextLevelSlug === 'pro'
+                ? 'Pro'
+                : 'Newbie'
             } level.`,
           })
         })
@@ -137,8 +166,18 @@ export const LearningPath = () => {
             description: 'Failed to update level. Please try again.',
           })
         })
+        .finally(() => {
+          setIsLevelUpgrading(false)
+        })
     }
-  }, [progressPercentage, currentLevel, user, queryClient, addNotification])
+  }, [
+    progressPercentage,
+    currentLevel,
+    user,
+    queryClient,
+    addNotification,
+    isLevelUpgrading,
+  ])
 
   const unlockAchievement = useCallback(
     (achievementId: string) => {

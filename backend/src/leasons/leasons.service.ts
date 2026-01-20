@@ -71,21 +71,6 @@ export class LeasonsService {
       },
     });
 
-    // Sort lessons by level order, then by order within level
-    const levelOrder = ['newbie', 'beginner', 'mid', 'pro'];
-    lessons.sort((a, b) => {
-      const aLevelIndex = levelOrder.indexOf(a.level.slug);
-      const bLevelIndex = levelOrder.indexOf(b.level.slug);
-
-      if (aLevelIndex !== bLevelIndex) {
-        return aLevelIndex - bLevelIndex;
-      }
-      if (a.order !== b.order) {
-        return a.order - b.order;
-      }
-      return a.id.localeCompare(b.id);
-    });
-
     if (!lessons || lessons.length === 0) {
       return [];
     }
@@ -110,24 +95,24 @@ export class LeasonsService {
     });
 
     const progressMap = new Map(
-      userProgress.map((p) => [p.leasonId, p.isCompleted]),
+      userProgress.map((p) => [p.leasonId, p.isCompleted])
     );
 
     // Define completion patterns for each lesson slug
     const completionPatterns: Record<string, string> = {
-      help: '^git help$',
-      version: '^git (?:--version|-v)$',
-      config: 'git config --global user\\.(?:name|email) ".*"',
-      init: '^git init$',
-      status: '^git status$',
-      add: '^git add',
-      commit: '^git commit -m ".+"$',
-      log: '^git log$',
-      branch: '^git branch',
-      checkout: '^git checkout',
-      push: '^git push',
-      pull: '^git pull',
-      clone: '^git clone https?:\\/\\/[^\\s]+$',
+      'help': '^git help$',
+      'version': '^git (?:--version|-v)$',
+      'config': 'git config --global user\\.(?:name|email) ".*"',
+      'init': '^git init$',
+      'status': '^git status$',
+      'add': '^git add',
+      'commit': '^git commit -m ".+"$',
+      'log': '^git log$',
+      'branch': '^git branch',
+      'checkout': '^git checkout',
+      'push': '^git push',
+      'pull': '^git pull',
+      'clone': '^git clone https?:\\/\\/[^\\s]+$',
     };
 
     const lessonsWithLock: LessonWithProgress[] = lessons.map((lesson) => {
@@ -152,12 +137,7 @@ export class LeasonsService {
         createdAt: lesson.createdAt,
         updatedAt: lesson.updatedAt,
         completed: isCompleted,
-        locked: !this.isLessonUnlocked(
-          lesson.id,
-          lessons,
-          progressMap,
-          currentUserLevelSlug,
-        ),
+        locked: !this.isLessonUnlocked(lesson.id, lessons, progressMap, currentUserLevelSlug),
       };
     });
 
@@ -170,26 +150,42 @@ export class LeasonsService {
     progressMap: Map<string, boolean>,
     userLevelSlug: string,
   ): boolean {
-    const currentLesson = lessons.find((l) => l.id === lessonId);
-    if (!currentLesson) {
+    const lesson = lessons.find((l) => l.id === lessonId);
+    if (!lesson) {
       return false;
     }
 
-    const currentLessonLevelSlug = currentLesson.level?.slug;
+    const lessonLevelSlug = lesson.level?.slug;
 
     // Define level order for access control
     const levelOrder = ['newbie', 'beginner', 'mid', 'pro'];
-    const currentLevelIndex = levelOrder.indexOf(currentLessonLevelSlug);
+    const lessonLevelIndex = levelOrder.indexOf(lessonLevelSlug);
     const userLevelIndex = levelOrder.indexOf(userLevelSlug);
 
-    // Lesson is locked if it's in a level different from user's current level
-    if (currentLevelIndex !== userLevelIndex) {
-      return false;
+    // LESSONS IN COMPLETED LEVELS (lower than user's current level) ARE UNLOCKED
+    // Users should have access to lessons they've already completed for review
+    if (lessonLevelIndex < userLevelIndex) {
+      const completedLevelLessons = lessons
+        .filter((l) => l.level?.slug === lessonLevelSlug)
+        .sort((a, b) => {
+          if (a.order !== b.order) {
+            return a.order - b.order;
+          }
+          return a.id.localeCompare(b.id);
+        });
+
+      const allCompleted = completedLevelLessons.every((l) => progressMap.get(l.id) === true);
+
+      if (allCompleted) {
+        return true;
+      }
+
+      return progressMap.get(lessonId) === true;
     }
 
-    // Get all lessons in same level and sort by order, then by id for determinism
+    // LESSONS IN USER'S CURRENT LEVEL
     const levelLessons = lessons
-      .filter((l) => l.level?.slug === currentLessonLevelSlug)
+      .filter((l) => l.level?.slug === lessonLevelSlug)
       .sort((a, b) => {
         if (a.order !== b.order) {
           return a.order - b.order;
@@ -201,15 +197,13 @@ export class LeasonsService {
       (l) => l.id === lessonId,
     );
 
-    // First lesson in the level is always unlocked
+    // First lesson in level is always unlocked
     if (currentIndexInLevel === 0) {
       return true;
     }
 
     // Other lessons are unlocked only if previous lesson is completed
     const previousLesson = levelLessons[currentIndexInLevel - 1];
-    const previousCompleted = progressMap.get(previousLesson.id) === true;
-
-    return previousCompleted;
+    return progressMap.get(previousLesson.id) === true;
   }
 }

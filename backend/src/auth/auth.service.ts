@@ -150,6 +150,13 @@ export class AuthService {
   async setUserLevel(userId: string, levelSlug: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
+      select: {
+        id: true,
+        subscribed: true,
+        level: {
+          select: { slug: true }
+        }
+      }
     });
 
     if (!user) {
@@ -162,9 +169,12 @@ export class AuthService {
       throw new BadRequestException('Level not found');
     }
 
-    // Check if user is subscribed for premium levels
+    console.log(`setUserLevel: userId=${userId}, currentLevel=${user.level?.slug}, targetLevel=${levelSlug}, subscribed=${user.subscribed}`);
+
+    // Check if user is subscribed for premium levels (mid and pro)
     if (levelSlug === 'mid' || levelSlug === 'pro') {
       if (!user.subscribed) {
+        console.log(`setUserLevel: BLOCKED - user not subscribed for premium level ${levelSlug}`);
         throw new BadRequestException(
           'Premium subscription required to access this level',
         );
@@ -176,6 +186,7 @@ export class AuthService {
       data: { levelId: level.id },
     });
 
+    console.log(`setUserLevel: SUCCESS - user level updated to ${levelSlug}`);
     return { success: true, message: 'User level updated successfully' };
   }
 
