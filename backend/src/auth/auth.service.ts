@@ -165,7 +165,9 @@ export class AuthService {
     // Check if user is subscribed for premium levels
     if (levelSlug === 'mid' || levelSlug === 'pro') {
       if (!user.subscribed) {
-        throw new BadRequestException('Premium subscription required to access this level');
+        throw new BadRequestException(
+          'Premium subscription required to access this level',
+        );
       }
     }
 
@@ -193,8 +195,10 @@ export class AuthService {
     const userLevelSlug = user.level?.slug || 'newbie';
 
     // Auto-downgrade non-subscribed users from premium levels
-    if (!user.subscribed && (userLevelSlug === 'mid' || userLevelSlug === 'pro')) {
-      console.log(`Auto-downgrading user ${userId} from ${userLevelSlug} to newbie (not subscribed)`);
+    if (
+      !user.subscribed &&
+      (userLevelSlug === 'mid' || userLevelSlug === 'pro')
+    ) {
       const newbieLevel = await this.levelsService.findBySlug('newbie');
       await this.prisma.user.update({
         where: { id: userId },

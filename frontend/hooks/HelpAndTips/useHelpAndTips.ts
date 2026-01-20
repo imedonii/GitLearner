@@ -47,7 +47,9 @@ interface UseHelpAndTipsReturn {
 // Fetch categories
 async function fetchCategories(): Promise<GitCommandCategory[]> {
   try {
-    const response = await axiosInstance.get<GitCommandCategory[]>('help-and-tips/categories')
+    const response = await axiosInstance.get<GitCommandCategory[]>(
+      'help-and-tips/categories'
+    )
     return response.data
   } catch (error) {
     console.error('Error fetching help and tips categories:', error)
@@ -58,7 +60,9 @@ async function fetchCategories(): Promise<GitCommandCategory[]> {
 // Fetch commands
 async function fetchCommands(): Promise<GitCommand[]> {
   try {
-    const response = await axiosInstance.get<GitCommand[]>('help-and-tips/commands')
+    const response = await axiosInstance.get<GitCommand[]>(
+      'help-and-tips/commands'
+    )
     return response.data
   } catch (error) {
     console.error('Error fetching help and tips commands:', error)
@@ -80,7 +84,9 @@ async function fetchTips(): Promise<Tip[]> {
 // Fetch common commands
 async function fetchCommonCommands(): Promise<GitCommand[]> {
   try {
-    const response = await axiosInstance.get<GitCommand[]>('help-and-tips/commands/common')
+    const response = await axiosInstance.get<GitCommand[]>(
+      'help-and-tips/commands/common'
+    )
     return response.data
   } catch (error) {
     console.error('Error fetching common commands:', error)
@@ -146,8 +152,13 @@ export function useHelpAndTips(): UseHelpAndTipsReturn {
     commands,
     tips,
     commonCommands,
-    isLoading: isLoadingCategories || isLoadingCommands || isLoadingTips || isLoadingCommon,
-    isError: isCategoriesError || isCommandsError || isTipsError || isCommonError,
+    isLoading:
+      isLoadingCategories ||
+      isLoadingCommands ||
+      isLoadingTips ||
+      isLoadingCommon,
+    isError:
+      isCategoriesError || isCommandsError || isTipsError || isCommonError,
     error: categoriesError || commandsError || tipsError || commonError || null,
   }
 }

@@ -20,7 +20,6 @@ export function useLogout() {
     },
     onError: (error) => {
       console.error('Logout failed:', error)
-      // Even if the API call fails, clear local state and redirect
       queryClient.removeQueries({ queryKey: [QUERY_KEY.user] })
       queryClient.clear()
       router.push('/auth/signin')

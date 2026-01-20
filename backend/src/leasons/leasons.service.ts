@@ -53,7 +53,11 @@ export class LeasonsService {
     return this.prisma.leasons.delete({ where: { id } });
   }
 
-  async findWithProgress(userId: string, levelId?: string, userLevelSlug?: string): Promise<LessonWithProgress[]> {
+  async findWithProgress(
+    userId: string,
+    levelId?: string,
+    userLevelSlug?: string,
+  ): Promise<LessonWithProgress[]> {
     const whereClause: any = {};
     if (levelId) {
       whereClause.levelId = levelId;
@@ -72,9 +76,6 @@ export class LeasonsService {
     lessons.sort((a, b) => {
       const aLevelIndex = levelOrder.indexOf(a.level.slug);
       const bLevelIndex = levelOrder.indexOf(b.level.slug);
-
-      console.log(`SORT: a=${a.title}, a.level=${a.level.slug}, a.order=${a.order}, aLevelIndex=${aLevelIndex}`);
-      console.log(`SORT: b=${b.title}, b.level=${b.level.slug}, b.order=${b.order}, bLevelIndex=${bLevelIndex}`);
 
       if (aLevelIndex !== bLevelIndex) {
         return aLevelIndex - bLevelIndex;
@@ -99,9 +100,6 @@ export class LeasonsService {
       currentUserLevelSlug = user?.level?.slug || 'newbie';
     }
 
-    console.log(`findWithProgress: userId=${userId}, userLevelSlug=${currentUserLevelSlug}`);
-    console.log(`findWithProgress: total lessons count: ${lessons.length}`);
-
     const userProgress = await this.prisma.userLeasonProgress.findMany({
       where: {
         userId,
@@ -112,26 +110,24 @@ export class LeasonsService {
     });
 
     const progressMap = new Map(
-      userProgress.map((p) => [p.leasonId, p.isCompleted])
+      userProgress.map((p) => [p.leasonId, p.isCompleted]),
     );
-
-    console.log(`findWithProgress: progressMap has ${progressMap.size} entries`);
 
     // Define completion patterns for each lesson slug
     const completionPatterns: Record<string, string> = {
-      'help': '^git help$',
-      'version': '^git (?:--version|-v)$',
-      'config': 'git config --global user\\.(?:name|email) ".*"',
-      'init': '^git init$',
-      'status': '^git status$',
-      'add': '^git add',
-      'commit': '^git commit -m ".+"$',
-      'log': '^git log$',
-      'branch': '^git branch',
-      'checkout': '^git checkout',
-      'push': '^git push',
-      'pull': '^git pull',
-      'clone': '^git clone https?:\\/\\/[^\\s]+$',
+      help: '^git help$',
+      version: '^git (?:--version|-v)$',
+      config: 'git config --global user\\.(?:name|email) ".*"',
+      init: '^git init$',
+      status: '^git status$',
+      add: '^git add',
+      commit: '^git commit -m ".+"$',
+      log: '^git log$',
+      branch: '^git branch',
+      checkout: '^git checkout',
+      push: '^git push',
+      pull: '^git pull',
+      clone: '^git clone https?:\\/\\/[^\\s]+$',
     };
 
     const lessonsWithLock: LessonWithProgress[] = lessons.map((lesson) => {
@@ -156,13 +152,13 @@ export class LeasonsService {
         createdAt: lesson.createdAt,
         updatedAt: lesson.updatedAt,
         completed: isCompleted,
-        locked: !this.isLessonUnlocked(lesson.id, lessons, progressMap, currentUserLevelSlug),
+        locked: !this.isLessonUnlocked(
+          lesson.id,
+          lessons,
+          progressMap,
+          currentUserLevelSlug,
+        ),
       };
-    });
-
-    console.log(`findWithProgress: returning ${lessonsWithLock.length} lessons`);
-    lessonsWithLock.forEach(l => {
-      console.log(`  ${l.order}. ${l.title} - Level: ${l.levelSlug}, Locked: ${l.locked}, Completed: ${l.completed}`);
     });
 
     return lessonsWithLock;
@@ -172,11 +168,10 @@ export class LeasonsService {
     lessonId: string,
     lessons: any[],
     progressMap: Map<string, boolean>,
-    userLevelSlug: string
+    userLevelSlug: string,
   ): boolean {
     const currentLesson = lessons.find((l) => l.id === lessonId);
     if (!currentLesson) {
-      console.log(`isLessonUnlocked: LOCKED - lesson not found: ${lessonId}`);
       return false;
     }
 
@@ -187,11 +182,8 @@ export class LeasonsService {
     const currentLevelIndex = levelOrder.indexOf(currentLessonLevelSlug);
     const userLevelIndex = levelOrder.indexOf(userLevelSlug);
 
-    console.log(`isLessonUnlocked: lessonId=${lessonId.substring(0, 8)}, lessonSlug=${currentLessonLevelSlug}, userLevelSlug=${userLevelSlug}, currentLevelIndex=${currentLevelIndex}, userLevelIndex=${userLevelIndex}`);
-
     // Lesson is locked if it's in a level different from user's current level
     if (currentLevelIndex !== userLevelIndex) {
-      console.log(`isLessonUnlocked: LOCKED - level mismatch (lesson level ${currentLessonLevelSlug} != user level ${userLevelSlug})`);
       return false;
     }
 
@@ -205,19 +197,19 @@ export class LeasonsService {
         return a.id.localeCompare(b.id);
       });
 
-    const currentIndexInLevel = levelLessons.findIndex((l) => l.id === lessonId);
-    console.log(`isLessonUnlocked: currentIndexInLevel=${currentIndexInLevel}, totalLessonsInLevel=${levelLessons.length}, first lesson in level: ${levelLessons[0]?.title.substring(0, 20)}`);
+    const currentIndexInLevel = levelLessons.findIndex(
+      (l) => l.id === lessonId,
+    );
 
     // First lesson in the level is always unlocked
     if (currentIndexInLevel === 0) {
-      console.log(`isLessonUnlocked: UNLOCKED - first lesson in level`);
       return true;
     }
 
     // Other lessons are unlocked only if previous lesson is completed
     const previousLesson = levelLessons[currentIndexInLevel - 1];
     const previousCompleted = progressMap.get(previousLesson.id) === true;
-    console.log(`isLessonUnlocked: ${previousCompleted ? 'UNLOCKED' : 'LOCKED'} - previous lesson ${previousCompleted ? 'completed' : 'not completed'}`);
+
     return previousCompleted;
   }
 }

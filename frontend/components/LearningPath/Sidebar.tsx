@@ -66,11 +66,16 @@ export default function Sidebar({
 }: SidebarProps) {
   const { levels } = useLevels()
 
-  console.log('SIDEBAR: currentLessonId:', currentLessonId)
-  console.log('SIDEBAR: lessons count:', lessons.length)
-  console.log('SIDEBAR: first 5 lessons:', lessons.slice(0, 5).map(l => ({ id: l.id.substring(0,8), title: l.title, level: l.level, locked: l.locked })))
-
-  const levelConfigs: Record<string, { name: string; color: string; bgColor: string; borderColor: string; emoji: string }> = {
+  const levelConfigs: Record<
+    string,
+    {
+      name: string
+      color: string
+      bgColor: string
+      borderColor: string
+      emoji: string
+    }
+  > = {
     newbie: {
       name: 'Newbie',
       color: 'text-blue-400',
@@ -101,45 +106,39 @@ export default function Sidebar({
     },
   }
 
-  // Get all levels from backend
-  const allLevels = levels?.map(l => l.slug) || []
-
   // Build grouped lessons dynamically for all backend levels
-  const groupedLessons: LessonGroup[] = levels?.map(level => {
-    const config = levelConfigs[level.slug] || {
-      name: level.name,
-      color: 'text-gray-400',
-      bgColor: 'bg-gray-500/10',
-      borderColor: 'border-gray-500/30',
-      emoji: '❓',
-    }
-    const levelLessons = lessons.filter(l => l.level === level.slug).sort((a, b) => a.order - b.order)
-    return {
-      level: level.slug,
-      name: level.name,
-      color: config.color,
-      bgColor: config.bgColor,
-      borderColor: config.borderColor,
-      emoji: config.emoji,
-      lessons: levelLessons,
-    }
-  }) || []
+  const groupedLessons: LessonGroup[] =
+    levels?.map((level) => {
+      const config = levelConfigs[level.slug] || {
+        name: level.name,
+        color: 'text-gray-400',
+        bgColor: 'bg-gray-500/10',
+        borderColor: 'border-gray-500/30',
+        emoji: '❓',
+      }
+      const levelLessons = lessons
+        .filter((l) => l.level === level.slug)
+        .sort((a, b) => a.order - b.order)
+      return {
+        level: level.slug,
+        name: level.name,
+        color: config.color,
+        bgColor: config.bgColor,
+        borderColor: config.borderColor,
+        emoji: config.emoji,
+        lessons: levelLessons,
+      }
+    }) || []
 
   const [expandedLevels, setExpandedLevels] = useState<Set<string>>(
     new Set(userLevel ? [userLevel] : [])
   )
-  const [premiumTooltip, setPremiumTooltip] = useState<string | null>(
-    null
-  )
+  const [premiumTooltip, setPremiumTooltip] = useState<string | null>(null)
   const [lessonTooltip, setLessonTooltip] = useState<string | null>(null)
 
   const isLevelPremium = (levelSlug: string) => {
     return !subscribed && (levelSlug === 'mid' || levelSlug === 'pro')
   }
-
-
-
-
 
   const toggleLevel = (level: string) => {
     setExpandedLevels((prev) => {
@@ -319,7 +318,8 @@ export default function Sidebar({
                       className="space-y-1 pl-2"
                     >
                       {group.lessons.map((lesson) => {
-                        const isLocked = lesson.locked || isLevelPremium(group.level)
+                        const isLocked =
+                          lesson.locked || isLevelPremium(group.level)
                         const isCurrent = currentLessonId === lesson.id
 
                         // Get level badge emoji
