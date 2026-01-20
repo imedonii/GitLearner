@@ -66,6 +66,10 @@ export default function Sidebar({
 }: SidebarProps) {
   const { levels } = useLevels()
 
+  console.log('SIDEBAR: currentLessonId:', currentLessonId)
+  console.log('SIDEBAR: lessons count:', lessons.length)
+  console.log('SIDEBAR: first 5 lessons:', lessons.slice(0, 5).map(l => ({ id: l.id.substring(0,8), title: l.title, level: l.level, locked: l.locked })))
+
   const levelConfigs: Record<string, { name: string; color: string; bgColor: string; borderColor: string; emoji: string }> = {
     newbie: {
       name: 'Newbie',
@@ -122,7 +126,7 @@ export default function Sidebar({
   }) || []
 
   const [expandedLevels, setExpandedLevels] = useState<Set<string>>(
-    new Set(allLevels)
+    new Set(userLevel ? [userLevel] : [])
   )
   const [premiumTooltip, setPremiumTooltip] = useState<string | null>(
     null

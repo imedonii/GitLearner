@@ -162,12 +162,48 @@ export class AuthService {
       throw new BadRequestException('Level not found');
     }
 
+    // Check if user is subscribed for premium levels
+    if (levelSlug === 'mid' || levelSlug === 'pro') {
+      if (!user.subscribed) {
+        throw new BadRequestException('Premium subscription required to access this level');
+      }
+    }
+
     await this.prisma.user.update({
       where: { id: userId },
       data: { levelId: level.id },
     });
 
     return { success: true, message: 'User level updated successfully' };
+  }
+
+  async getUserLevel(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        level: { select: { slug: true } },
+        subscribed: true,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    const userLevelSlug = user.level?.slug || 'newbie';
+
+    // Auto-downgrade non-subscribed users from premium levels
+    if (!user.subscribed && (userLevelSlug === 'mid' || userLevelSlug === 'pro')) {
+      console.log(`Auto-downgrading user ${userId} from ${userLevelSlug} to newbie (not subscribed)`);
+      const newbieLevel = await this.levelsService.findBySlug('newbie');
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { levelId: newbieLevel?.id },
+      });
+      return newbieLevel?.slug || 'newbie';
+    }
+
+    return userLevelSlug;
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDto) {

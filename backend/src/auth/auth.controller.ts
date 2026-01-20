@@ -42,7 +42,17 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  getMe(@Req() req: Request) {
+  async getMe(@Req() req: Request) {
+    const user = req.user as { id: string };
+
+    // Auto-downgrade non-subscribed users from premium levels
+    const correctedLevel = await this.authService.getUserLevel(user.id);
+
+    // If level was corrected, update the user object
+    if (req.user && typeof req.user === 'object' && 'level' in req.user) {
+      (req.user as any).level.slug = correctedLevel;
+    }
+
     return {
       user: req.user,
     };

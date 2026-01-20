@@ -52,7 +52,11 @@ export const Level = () => {
     useState<KnowledgeLevel | null>(null)
 
   const isLevelLocked = (levelId: KnowledgeLevel) => {
-    return levelId !== 'newbie' // Only newbie is available for new users
+    // Mid and Pro are premium levels
+    if (levelId === 'mid' || levelId === 'pro') {
+      return !user?.subscribed
+    }
+    return false
   }
 
   const handleContinue = async () => {
@@ -141,13 +145,13 @@ export const Level = () => {
                 onMouseEnter={() => isLocked && setLockedLevelTooltip(level.id)}
                 onMouseLeave={() => setLockedLevelTooltip(null)}
               >
-                 {/* Premium Tooltip */}
-                 <AppTooltip
-                   isVisible={lockedLevelTooltip === level.id && isLocked}
-                   content="Premium"
-                   variant="premium"
-                   position="top"
-                 />
+                {/* Premium Tooltip */}
+                <AppTooltip
+                  isVisible={lockedLevelTooltip === level.id && isLocked}
+                  content="Premium"
+                  variant="premium"
+                  position="top"
+                />
 
                 {/* Selection Indicator */}
                 {isSelected && (
@@ -223,9 +227,7 @@ export const Level = () => {
 
         {/* Error Message */}
         {error && (
-          <p className="text-center text-sm text-red-400 mt-4">
-            {error}
-          </p>
+          <p className="text-center text-sm text-red-400 mt-4">{error}</p>
         )}
 
         {/* Help Text */}

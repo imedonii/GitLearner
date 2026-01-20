@@ -82,26 +82,33 @@ export const LearningPath = () => {
   // Set current lesson ID on initial load or when lessons change
   useEffect(() => {
     if (lessons && lessons.length > 0) {
-      console.log('DEBUG: lessons:', lessons.map(l => ({ id: l.id, title: l.title, levelSlug: l.levelSlug, locked: l.locked })))
+      console.log('DEBUG: lessons received:', lessons.map(l => ({ id: l.id.substring(0,8), title: l.title.substring(0,30), levelSlug: l.levelSlug, locked: l.locked })))
       console.log('DEBUG: currentLevel:', currentLevel)
       console.log('DEBUG: user?.level?.slug:', user?.level?.slug)
       console.log('DEBUG: currentLessonId (before):', currentLessonId)
+
+      // Find first unlocked lesson in user's level
+      const firstUnlockedInLevel = lessons.find((l) => !l.locked && levelSlugToKey(l.levelSlug) === currentLevel)
+      console.log('DEBUG: firstUnlockedInLevel:', firstUnlockedInLevel ? { id: firstUnlockedInLevel.id.substring(0,8), title: firstUnlockedInLevel.title.substring(0,30), levelSlug: firstUnlockedInLevel.levelSlug } : 'NOT FOUND')
+
+      // Find ANY unlocked lesson
+      const anyUnlocked = lessons.find((l) => !l.locked)
+      console.log('DEBUG: anyUnlocked:', anyUnlocked ? { id: anyUnlocked.id.substring(0,8), title: anyUnlocked.title.substring(0,30), levelSlug: anyUnlocked.levelSlug } : 'NOT FOUND')
+
       // Always ensure current lesson is unlocked
       const currentLesson = lessons.find((l) => l.id === currentLessonId)
       if (currentLesson && currentLesson.locked) {
         // If current lesson is locked, switch to first unlocked in current level, then any unlocked
-        const firstUnlockedInLevel = lessons.find((l) => !l.locked && levelSlugToKey(l.levelSlug) === currentLevel)
-        const firstUnlocked = firstUnlockedInLevel || lessons.find((l) => !l.locked)
-        console.log('DEBUG: current lesson is locked, firstUnlockedInLevel:', firstUnlockedInLevel, 'firstUnlocked:', firstUnlocked)
+        const firstUnlocked = firstUnlockedInLevel || anyUnlocked
+        console.log('DEBUG: current lesson is locked, switching to:', firstUnlocked)
         if (firstUnlocked) {
           console.log('DEBUG: Setting currentLessonId to:', firstUnlocked.id)
           setCurrentLessonId(firstUnlocked.id)
         }
       } else if (!currentLessonId) {
         // No current lesson set, find first unlocked in current level, then any unlocked
-        const firstUnlockedInLevel = lessons.find((l) => !l.locked && levelSlugToKey(l.levelSlug) === currentLevel)
-        const firstUnlocked = firstUnlockedInLevel || lessons.find((l) => !l.locked)
-        console.log('DEBUG: currentLessonId is null, firstUnlockedInLevel:', firstUnlockedInLevel, 'firstUnlocked:', firstUnlocked)
+        const firstUnlocked = firstUnlockedInLevel || anyUnlocked
+        console.log('DEBUG: currentLessonId is null, switching to:', firstUnlocked)
         if (firstUnlocked) {
           console.log('DEBUG: Setting currentLessonId to:', firstUnlocked.id)
           setCurrentLessonId(firstUnlocked.id)
@@ -178,8 +185,17 @@ export const LearningPath = () => {
 
   const currentLesson =
     lessons && currentLessonId
-      ? lessons.find((l) => l.id === currentLessonId) || null
+      ? lessons.find((l) => l.id === currentLessonId)
       : null
+
+  // Safety check: never show a locked lesson as current
+  if (currentLesson && currentLesson.locked && lessons) {
+    const firstUnlocked = lessons.find((l) => !l.locked && levelSlugToKey(l.levelSlug) === currentLevel)
+    if (firstUnlocked) {
+      console.log('DEBUG: Forcing switch from locked lesson to first unlocked:', firstUnlocked.title)
+      setCurrentLessonId(firstUnlocked.id)
+    }
+  }
 
   // Map backend lessons to sidebar items with progress from backend
   const lessonItems = Array.isArray(lessons)
@@ -361,7 +377,7 @@ export const LearningPath = () => {
 
         <Sidebar
           lessons={lessonItems}
-          currentLessonId={currentLessonId ?? lessonItems[0]?.id}
+          currentLessonId={currentLesson && !currentLesson.locked ? currentLesson.id : ''}
           onLessonSelect={handleLessonSelect}
           onGoHome={onGoHome}
           onPlayground={onPlayground}

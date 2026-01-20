@@ -33,9 +33,7 @@ export const levelSlugToKey = (
     mid: 'mid',
     pro: 'pro',
   }
-  const result = mapping[slug || ''] || 'newbie'
-  console.log('levelSlugToKey:', { input: slug, output: result })
-  return result
+  return mapping[slug || ''] || 'newbie'
 }
 
 async function getUser(): Promise<User | null> {

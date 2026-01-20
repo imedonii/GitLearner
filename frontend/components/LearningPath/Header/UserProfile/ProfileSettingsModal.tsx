@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useLayoutEffect } from 'react'
-import { createPortal } from 'react-dom'
+import { useState, useLayoutEffect, useMemo, useEffect } from 'react'
+import * as ReactDOM from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   X,
@@ -674,5 +674,5 @@ export default function ProfileSettingsModal({
     </AnimatePresence>
   )
 
-  return createPortal(modalContent, document.body)
+  return ReactDOM.createPortal(modalContent, document.body)
 }

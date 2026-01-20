@@ -65,16 +65,24 @@ export class LeasonsService {
       include: {
         level: true,
       },
-      orderBy: [
-        {
-          level: {
-            id: 'asc',
-          },
-        },
-        {
-          order: 'asc',
-        },
-      ],
+    });
+
+    // Sort lessons by level order, then by order within level
+    const levelOrder = ['newbie', 'beginner', 'mid', 'pro'];
+    lessons.sort((a, b) => {
+      const aLevelIndex = levelOrder.indexOf(a.level.slug);
+      const bLevelIndex = levelOrder.indexOf(b.level.slug);
+
+      console.log(`SORT: a=${a.title}, a.level=${a.level.slug}, a.order=${a.order}, aLevelIndex=${aLevelIndex}`);
+      console.log(`SORT: b=${b.title}, b.level=${b.level.slug}, b.order=${b.order}, bLevelIndex=${bLevelIndex}`);
+
+      if (aLevelIndex !== bLevelIndex) {
+        return aLevelIndex - bLevelIndex;
+      }
+      if (a.order !== b.order) {
+        return a.order - b.order;
+      }
+      return a.id.localeCompare(b.id);
     });
 
     if (!lessons || lessons.length === 0) {
@@ -92,10 +100,7 @@ export class LeasonsService {
     }
 
     console.log(`findWithProgress: userId=${userId}, userLevelSlug=${currentUserLevelSlug}`);
-
-    if (!lessons || lessons.length === 0) {
-      return [];
-    }
+    console.log(`findWithProgress: total lessons count: ${lessons.length}`);
 
     const userProgress = await this.prisma.userLeasonProgress.findMany({
       where: {
@@ -170,7 +175,10 @@ export class LeasonsService {
     userLevelSlug: string
   ): boolean {
     const currentLesson = lessons.find((l) => l.id === lessonId);
-    if (!currentLesson) return false;
+    if (!currentLesson) {
+      console.log(`isLessonUnlocked: LOCKED - lesson not found: ${lessonId}`);
+      return false;
+    }
 
     const currentLessonLevelSlug = currentLesson.level?.slug;
 
@@ -179,11 +187,11 @@ export class LeasonsService {
     const currentLevelIndex = levelOrder.indexOf(currentLessonLevelSlug);
     const userLevelIndex = levelOrder.indexOf(userLevelSlug);
 
-    console.log(`isLessonUnlocked: lessonId=${lessonId}, lessonSlug=${currentLessonLevelSlug}, userLevelSlug=${userLevelSlug}, currentLevelIndex=${currentLevelIndex}, userLevelIndex=${userLevelIndex}`);
+    console.log(`isLessonUnlocked: lessonId=${lessonId.substring(0, 8)}, lessonSlug=${currentLessonLevelSlug}, userLevelSlug=${userLevelSlug}, currentLevelIndex=${currentLevelIndex}, userLevelIndex=${userLevelIndex}`);
 
     // Lesson is locked if it's in a level different from user's current level
     if (currentLevelIndex !== userLevelIndex) {
-      console.log(`isLessonUnlocked: LOCKED - level mismatch`);
+      console.log(`isLessonUnlocked: LOCKED - level mismatch (lesson level ${currentLessonLevelSlug} != user level ${userLevelSlug})`);
       return false;
     }
 
@@ -198,7 +206,7 @@ export class LeasonsService {
       });
 
     const currentIndexInLevel = levelLessons.findIndex((l) => l.id === lessonId);
-    console.log(`isLessonUnlocked: currentIndexInLevel=${currentIndexInLevel}, totalLessonsInLevel=${levelLessons.length}`);
+    console.log(`isLessonUnlocked: currentIndexInLevel=${currentIndexInLevel}, totalLessonsInLevel=${levelLessons.length}, first lesson in level: ${levelLessons[0]?.title.substring(0, 20)}`);
 
     // First lesson in the level is always unlocked
     if (currentIndexInLevel === 0) {
