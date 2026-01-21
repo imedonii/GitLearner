@@ -3,28 +3,31 @@ import { GitBranch, Terminal, Code, Zap } from 'lucide-react'
 import { useMemo } from 'react'
 
 export default function LoadingPage() {
-  const particles = useMemo(() => [
-    { x: 100, y: 200, animateY: 400, duration: 3.5, delay: 0 },
-    { x: 300, y: 150, animateY: 350, duration: 4.2, delay: 0.5 },
-    { x: 500, y: 300, animateY: 500, duration: 3.8, delay: 1.0 },
-    { x: 700, y: 100, animateY: 300, duration: 4.5, delay: 0.3 },
-    { x: 900, y: 250, animateY: 450, duration: 3.2, delay: 0.8 },
-    { x: 200, y: 400, animateY: 600, duration: 4.1, delay: 1.2 },
-    { x: 400, y: 50, animateY: 250, duration: 3.9, delay: 0.6 },
-    { x: 600, y: 350, animateY: 550, duration: 4.3, delay: 0.9 },
-    { x: 800, y: 180, animateY: 380, duration: 3.6, delay: 1.4 },
-    { x: 150, y: 280, animateY: 480, duration: 4.0, delay: 0.2 },
-    { x: 350, y: 120, animateY: 320, duration: 3.7, delay: 1.1 },
-    { x: 550, y: 420, animateY: 620, duration: 4.4, delay: 0.7 },
-    { x: 750, y: 80, animateY: 280, duration: 3.3, delay: 1.3 },
-    { x: 950, y: 320, animateY: 520, duration: 4.2, delay: 0.4 },
-    { x: 250, y: 220, animateY: 420, duration: 3.8, delay: 1.0 },
-    { x: 450, y: 380, animateY: 580, duration: 4.1, delay: 0.5 },
-    { x: 650, y: 60, animateY: 260, duration: 3.5, delay: 1.2 },
-    { x: 850, y: 290, animateY: 490, duration: 4.3, delay: 0.8 },
-    { x: 50, y: 160, animateY: 360, duration: 3.9, delay: 1.5 },
-    { x: 1100, y: 240, animateY: 440, duration: 4.0, delay: 0.3 },
-  ], [])
+  const particles = useMemo(
+    () => [
+      { x: 100, y: 200, animateY: 400, duration: 3.5, delay: 0 },
+      { x: 300, y: 150, animateY: 350, duration: 4.2, delay: 0.5 },
+      { x: 500, y: 300, animateY: 500, duration: 3.8, delay: 1.0 },
+      { x: 700, y: 100, animateY: 300, duration: 4.5, delay: 0.3 },
+      { x: 900, y: 250, animateY: 450, duration: 3.2, delay: 0.8 },
+      { x: 200, y: 400, animateY: 600, duration: 4.1, delay: 1.2 },
+      { x: 400, y: 50, animateY: 250, duration: 3.9, delay: 0.6 },
+      { x: 600, y: 350, animateY: 550, duration: 4.3, delay: 0.9 },
+      { x: 800, y: 180, animateY: 380, duration: 3.6, delay: 1.4 },
+      { x: 150, y: 280, animateY: 480, duration: 4.0, delay: 0.2 },
+      { x: 350, y: 120, animateY: 320, duration: 3.7, delay: 1.1 },
+      { x: 550, y: 420, animateY: 620, duration: 4.4, delay: 0.7 },
+      { x: 750, y: 80, animateY: 280, duration: 3.3, delay: 1.3 },
+      { x: 950, y: 320, animateY: 520, duration: 4.2, delay: 0.4 },
+      { x: 250, y: 220, animateY: 420, duration: 3.8, delay: 1.0 },
+      { x: 450, y: 380, animateY: 580, duration: 4.1, delay: 0.5 },
+      { x: 650, y: 60, animateY: 260, duration: 3.5, delay: 1.2 },
+      { x: 850, y: 290, animateY: 490, duration: 4.3, delay: 0.8 },
+      { x: 50, y: 160, animateY: 360, duration: 3.9, delay: 1.5 },
+      { x: 1100, y: 240, animateY: 440, duration: 4.0, delay: 0.3 },
+    ],
+    []
+  )
 
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center overflow-hidden relative">
@@ -99,7 +102,7 @@ export default function LoadingPage() {
           transition={{ delay: 0.3, duration: 0.6 }}
           className="text-5xl font-bold mb-4 bg-gradient-to-r from-emerald-400 via-blue-400 to-purple-400 bg-clip-text text-transparent"
         >
-          Learn Git
+          Git Learner
         </motion.h1>
 
         {/* Subtitle */}
