@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   AchievementToast,
-  achievements as initialAchievements,
+  defaultAchievements,
   Achievement,
 } from './AchievementBadge'
 import AchievementsModal from './AchievementsModal'
@@ -46,7 +46,7 @@ export const LearningPath = () => {
     useState<Achievement | null>(null)
   const [showAchievements, setShowAchievements] = useState(false)
   const [totalCommits, setTotalCommits] = useState(0)
-  const [achievements, setAchievements] = useState(initialAchievements)
+  const [achievements, setAchievements] = useState(defaultAchievements)
   const [isLevelUpgrading, setIsLevelUpgrading] = useState(false)
 
   const currentLevel = levelSlugToKey(user?.level?.slug) || 'newbie'

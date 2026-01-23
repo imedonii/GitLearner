@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { Trophy, Star, Zap, Award, Target, Rocket } from 'lucide-react'
+import { Trophy, Star, Zap, Award, Target, Rocket, LucideIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { Achievement as APIAchievement } from '@/hooks/Content/useContent'
 
 export interface Achievement {
   id: string
@@ -15,7 +16,7 @@ interface AchievementBadgeProps {
   onUnlock?: (id: string) => void
 }
 
-const iconMap = {
+const iconMap: Record<string, LucideIcon> = {
   trophy: Trophy,
   star: Star,
   zap: Zap,
@@ -25,7 +26,7 @@ const iconMap = {
 }
 
 export function AchievementBadge({ achievement }: AchievementBadgeProps) {
-  const Icon = iconMap[achievement.icon]
+  const Icon = iconMap[achievement.icon] || Trophy
 
   return (
     <div
@@ -70,7 +71,7 @@ export function AchievementToast({
   achievement: Achievement
 }) {
   const [visible, setVisible] = useState(true)
-  const Icon = iconMap[achievement.icon]
+  const Icon = iconMap[achievement.icon] || Trophy
 
   useEffect(() => {
     const timer = setTimeout(() => setVisible(false), 10000)
@@ -116,7 +117,8 @@ export function AchievementToast({
   )
 }
 
-export const achievements: Achievement[] = [
+// Default achievements (fallback when API is not available)
+export const defaultAchievements: Achievement[] = [
   {
     id: 'first-init',
     title: 'Getting Started',
@@ -155,8 +157,25 @@ export const achievements: Achievement[] = [
   {
     id: 'complete-all',
     title: 'Git Expert',
-    description: 'Complete all 14 lessons',
+    description: 'Complete all lessons',
     icon: 'award',
     unlocked: false,
   },
 ]
+
+// Helper to convert API achievements to component format
+export function mapAPIAchievementsToLocal(
+  apiAchievements: APIAchievement[],
+  userUnlockedIds: string[] = []
+): Achievement[] {
+  return apiAchievements.map((a) => ({
+    id: a.slug,
+    title: a.title,
+    description: a.description,
+    icon: a.icon as Achievement['icon'],
+    unlocked: userUnlockedIds.includes(a.id),
+  }))
+}
+
+// For backwards compatibility
+export const achievements = defaultAchievements

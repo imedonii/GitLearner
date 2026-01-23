@@ -15,10 +15,9 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/UI'
 import AppTooltip from '@/components/UI/AppTooltip'
-import { useState } from 'react'
-import { useLevels } from '@/hooks/Levels/useLevels'
+import { useState, useMemo } from 'react'
+import { useLevelsWithStyling, LevelWithStyling } from '@/hooks/Content/useContent'
 import { levelSlugToKey } from '@/hooks/Auth/useUser'
-import { KnowledgeLevel } from './KnowledgeLevelPage'
 
 export interface LessonItem {
   id: string
@@ -29,6 +28,7 @@ export interface LessonItem {
   description?: string
   category?: string | null
   order: number
+  isPaid?: boolean
 }
 
 interface SidebarProps {
@@ -50,7 +50,57 @@ interface LessonGroup {
   bgColor: string
   borderColor: string
   emoji: string
+  isPaid: boolean
   lessons: LessonItem[]
+}
+
+// Fallback level configs
+const defaultLevelConfigs: Record<
+  string,
+  {
+    name: string
+    color: string
+    bgColor: string
+    borderColor: string
+    emoji: string
+  }
+> = {
+  newbie: {
+    name: 'Newbie',
+    color: 'text-blue-400',
+    bgColor: 'bg-blue-500/10',
+    borderColor: 'border-blue-500/30',
+    emoji: '🔵',
+  },
+  beginner: {
+    name: 'Beginner',
+    color: 'text-emerald-400',
+    bgColor: 'bg-emerald-500/10',
+    borderColor: 'border-emerald-500/30',
+    emoji: '🟢',
+  },
+  mid: {
+    name: 'I Know Things',
+    color: 'text-yellow-400',
+    bgColor: 'bg-yellow-500/10',
+    borderColor: 'border-yellow-500/30',
+    emoji: '🟡',
+  },
+  pro: {
+    name: 'Pro',
+    color: 'text-red-400',
+    bgColor: 'bg-red-500/10',
+    borderColor: 'border-red-500/30',
+    emoji: '🔴',
+  },
+}
+
+// Progress bar color mapping
+const progressBarColors: Record<string, string> = {
+  newbie: 'bg-blue-400',
+  beginner: 'bg-emerald-400',
+  mid: 'bg-yellow-400',
+  pro: 'bg-red-400',
 }
 
 export default function Sidebar({
@@ -64,71 +114,64 @@ export default function Sidebar({
   userLevel,
   subscribed = false,
 }: SidebarProps) {
-  const { levels } = useLevels()
+  const { data: apiLevels } = useLevelsWithStyling()
 
-  const levelConfigs: Record<
-    string,
-    {
-      name: string
-      color: string
-      bgColor: string
-      borderColor: string
-      emoji: string
+  // Build level configs from API or use fallback
+  const levelConfigs = useMemo(() => {
+    if (!apiLevels || apiLevels.length === 0) {
+      return defaultLevelConfigs
     }
-  > = {
-    newbie: {
-      name: 'Newbie',
-      color: 'text-blue-400',
-      bgColor: 'bg-blue-500/10',
-      borderColor: 'border-blue-500/30',
-      emoji: '🔵',
-    },
-    beginner: {
-      name: 'Beginner',
-      color: 'text-emerald-400',
-      bgColor: 'bg-emerald-500/10',
-      borderColor: 'border-emerald-500/30',
-      emoji: '🟢',
-    },
-    mid: {
-      name: 'I Know Things',
-      color: 'text-yellow-400',
-      bgColor: 'bg-yellow-500/10',
-      borderColor: 'border-yellow-500/30',
-      emoji: '🟡',
-    },
-    pro: {
-      name: 'Pro',
-      color: 'text-red-400',
-      bgColor: 'bg-red-500/10',
-      borderColor: 'border-red-500/30',
-      emoji: '🔴',
-    },
-  }
 
-  // Build grouped lessons dynamically for all backend levels
-  const groupedLessons: LessonGroup[] =
-    levels?.map((level) => {
-      const config = levelConfigs[level.slug] || {
+    const configs: Record<string, typeof defaultLevelConfigs[string]> = {}
+    apiLevels.forEach((level) => {
+      configs[level.slug] = {
         name: level.name,
-        color: 'text-gray-400',
-        bgColor: 'bg-gray-500/10',
-        borderColor: 'border-gray-500/30',
-        emoji: '❓',
+        color: level.color || defaultLevelConfigs[level.slug]?.color || 'text-gray-400',
+        bgColor: level.bgColor || defaultLevelConfigs[level.slug]?.bgColor || 'bg-gray-500/10',
+        borderColor: level.borderColor || defaultLevelConfigs[level.slug]?.borderColor || 'border-gray-500/30',
+        emoji: level.emoji || defaultLevelConfigs[level.slug]?.emoji || '❓',
       }
-      const levelLessons = lessons
-        .filter((l) => l.level === level.slug)
-        .sort((a, b) => a.order - b.order)
-      return {
-        level: level.slug,
-        name: level.name,
-        color: config.color,
-        bgColor: config.bgColor,
-        borderColor: config.borderColor,
-        emoji: config.emoji,
-        lessons: levelLessons,
-      }
-    }) || []
+    })
+    return configs
+  }, [apiLevels])
+
+  // Determine level order from API or use default
+  const levelOrder = useMemo(() => {
+    if (apiLevels && apiLevels.length > 0) {
+      return [...apiLevels].sort((a, b) => a.order - b.order).map((l) => l.slug)
+    }
+    return ['newbie', 'beginner', 'mid', 'pro']
+  }, [apiLevels])
+
+  // Build grouped lessons dynamically for all levels
+  const groupedLessons: LessonGroup[] = useMemo(() => {
+    return levelOrder
+      .map((slug) => {
+        const apiLevel = apiLevels?.find((l) => l.slug === slug)
+        const config = levelConfigs[slug] || {
+          name: slug,
+          color: 'text-gray-400',
+          bgColor: 'bg-gray-500/10',
+          borderColor: 'border-gray-500/30',
+          emoji: '❓',
+        }
+        const levelLessons = lessons
+          .filter((l) => l.level === slug)
+          .sort((a, b) => a.order - b.order)
+
+        return {
+          level: slug,
+          name: config.name,
+          color: config.color,
+          bgColor: config.bgColor,
+          borderColor: config.borderColor,
+          emoji: config.emoji,
+          isPaid: apiLevel?.isPaid ?? (slug === 'mid' || slug === 'pro'), // fallback to hardcoded
+          lessons: levelLessons,
+        }
+      })
+      .filter((group) => group.lessons.length > 0)
+  }, [levelOrder, levelConfigs, lessons, apiLevels])
 
   const [expandedLevels, setExpandedLevels] = useState<Set<string>>(
     new Set(userLevel ? [userLevel] : [])
@@ -136,8 +179,20 @@ export default function Sidebar({
   const [premiumTooltip, setPremiumTooltip] = useState<string | null>(null)
   const [lessonTooltip, setLessonTooltip] = useState<string | null>(null)
 
-  const isLevelPremium = (levelSlug: string) => {
-    return !subscribed && (levelSlug === 'mid' || levelSlug === 'pro')
+  // Check if a lesson is premium locked (isPaid and user not subscribed)
+  const isLessonPremiumLocked = (lesson: LessonItem) => {
+    return !subscribed && lesson.isPaid === true
+  }
+
+  // Check if a level is premium (based on level's isPaid from API)
+  const isLevelPremium = (group: LessonGroup) => {
+    return !subscribed && group.isPaid
+  }
+
+  // Helper to check if level is premium by slug (for backward compat)
+  const isLevelPremiumBySlug = (levelSlug: string) => {
+    const group = groupedLessons.find((g) => g.level === levelSlug)
+    return group ? isLevelPremium(group) : false
   }
 
   const toggleLevel = (level: string) => {
@@ -233,7 +288,9 @@ export default function Sidebar({
               (l) => l.completed
             ).length
             const progressInLevel =
-              (completedInLevel / group.lessons.length) * 100
+              group.lessons.length > 0
+                ? (completedInLevel / group.lessons.length) * 100
+                : 0
 
             return (
               <div key={group.level} className="space-y-2">
@@ -241,29 +298,20 @@ export default function Sidebar({
                 <div
                   className="relative"
                   onMouseEnter={() =>
-                    isLevelPremium(group.level) &&
+                    isLevelPremium(group) &&
                     setPremiumTooltip(group.level)
                   }
                   onMouseLeave={() => setPremiumTooltip(null)}
                 >
                   <button
-                    onClick={() =>
-                      !isLevelPremium(group.level) && toggleLevel(group.level)
-                    }
-                    disabled={isLevelPremium(group.level)}
+                    onClick={() => toggleLevel(group.level)}
                     className={`w-full p-3 rounded-lg ${group.bgColor} ${
                       group.borderColor
-                    } border ${
-                      isLevelPremium(group.level)
-                        ? 'opacity-60 cursor-not-allowed'
-                        : 'hover:opacity-80'
-                    } transition-opacity`}
+                    } border hover:opacity-80 transition-opacity`}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        {isLevelPremium(group.level) ? (
-                          <Lock className="w-4 h-4 text-yellow-400" />
-                        ) : isExpanded ? (
+                        {isExpanded ? (
                           <ChevronDown className="w-4 h-4 text-slate-400" />
                         ) : (
                           <ChevronRight className="w-4 h-4 text-slate-400" />
@@ -272,6 +320,10 @@ export default function Sidebar({
                         <span className={`font-semibold ${group.color}`}>
                           {group.name}
                         </span>
+                        {/* Show lock icon for premium levels */}
+                        {isLevelPremium(group) && (
+                          <Lock className="w-4 h-4 text-yellow-400" />
+                        )}
                       </div>
                       <span className="text-xs text-slate-400">
                         {completedInLevel}/{group.lessons.length}
@@ -285,11 +337,7 @@ export default function Sidebar({
                         animate={{ width: `${progressInLevel}%` }}
                         transition={{ duration: 0.3 }}
                         className={`h-full ${
-                          group.level === 'beginner'
-                            ? 'bg-emerald-400'
-                            : group.level === 'mid'
-                            ? 'bg-yellow-400'
-                            : 'bg-red-400'
+                          progressBarColors[group.level] || 'bg-gray-400'
                         }`}
                       />
                     </div>
@@ -299,7 +347,7 @@ export default function Sidebar({
                   <AppTooltip
                     isVisible={
                       premiumTooltip === group.level &&
-                      isLevelPremium(group.level)
+                      isLevelPremium(group)
                     }
                     content="Premium"
                     variant="premium"
@@ -318,13 +366,15 @@ export default function Sidebar({
                       className="space-y-1 pl-2"
                     >
                       {group.lessons.map((lesson) => {
-                        const isLocked =
-                          lesson.locked || isLevelPremium(group.level)
+                        // Backend now handles all lock logic including premium
+                        // lesson.locked is true if: isPaid && !subscribed, OR previous lesson not completed
+                        const isLocked = lesson.locked ?? false
                         const isCurrent = currentLessonId === lesson.id
 
                         // Get level badge emoji
                         const levelEmoji = group.emoji
-                        const isPremiumLocked = isLevelPremium(group.level)
+                        // Check if this specific lesson is premium locked
+                        const isPremiumLocked = isLessonPremiumLocked(lesson)
 
                         return (
                           <div key={lesson.id} className="relative">

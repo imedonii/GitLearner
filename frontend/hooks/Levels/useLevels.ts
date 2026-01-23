@@ -6,6 +6,13 @@ export interface Level {
   id: string
   name: string
   slug: string
+  description?: string
+  color?: string
+  bgColor?: string
+  borderColor?: string
+  emoji?: string
+  icon?: string
+  order?: number
 }
 
 interface UseLevelsReturn {

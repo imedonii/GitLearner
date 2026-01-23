@@ -2,37 +2,50 @@
 
 import { motion } from 'framer-motion'
 import { Button } from '@/components/UI'
-import { Rocket, ChevronRight } from 'lucide-react'
+import { Rocket, ChevronRight, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { PlaygroundFeature } from './PlaygroundFeature'
+import { usePlaygroundFeatures, PlaygroundFeature as PlaygroundFeatureType } from '@/hooks/Content/useContent'
+import { sectionAnimation } from '@/constants'
+
+// Fallback data for when API is not available
+const fallbackFeatures: Pick<PlaygroundFeatureType, 'id' | 'text'>[] = [
+  { id: 'feature-0', text: 'Simulated terminal with real Git commands' },
+  { id: 'feature-1', text: 'Live file editing & status tracking' },
+  { id: 'feature-2', text: 'Visual Git flow diagram (GitKraken-style)' },
+  { id: 'feature-3', text: 'No installation required' },
+]
 
 export const PlaygroundSection = () => {
   const router = useRouter()
+  const { data: features, isLoading } = usePlaygroundFeatures()
 
   const onNavigateToPlayground = () => {
     router.push('/playground')
   }
 
+  // Use API data if available, otherwise use fallback
+  const featureData = features && features.length > 0 ? features : fallbackFeatures
+
   return (
     <section className="py-20 border-t border-slate-800">
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        className="max-w-6xl mx-auto"
-      >
+      <motion.div {...sectionAnimation} className="max-w-6xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <h2 className="text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent">
               Practice in a Real Git Playground
             </h2>
-            <ul className="space-y-4 mb-8">
-              <PlaygroundFeature text="Simulated terminal with real Git commands" />
-              <PlaygroundFeature text="Live file editing & status tracking" />
-              <PlaygroundFeature text="Visual Git flow diagram (GitKraken-style)" />
-              <PlaygroundFeature text="No installation required" />
-            </ul>
+            {isLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-emerald-400" />
+              </div>
+            ) : (
+              <ul className="space-y-4 mb-8">
+                {featureData.map((feature) => (
+                  <PlaygroundFeature key={feature.id} text={feature.text} />
+                ))}
+              </ul>
+            )}
             <Button
               onClick={onNavigateToPlayground}
               size="lg"

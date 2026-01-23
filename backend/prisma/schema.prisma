@@ -10,6 +10,14 @@ model Level {
   id                   String               @id @default(uuid())
   name                 String
   slug                 String               @unique
+  description          String?
+  color                String?              // Tailwind color class prefix (e.g., "emerald", "blue")
+  bgColor              String?              // Background color class
+  borderColor          String?              // Border color class
+  emoji                String?              // Level emoji
+  icon                 String?              // Icon name for the level
+  order                Int                  @default(0)
+  isPaid               Boolean              @default(false) // Premium level flag
   users                User[]
   leasons              Leasons[]
   createdAt            DateTime             @default(now())
@@ -110,4 +118,108 @@ enum TipType {
   pro
   do
   dont
+}
+
+// FAQ items for the landing page
+model FAQ {
+  id          String   @id @default(uuid())
+  question    String
+  answer      String
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Achievements that users can unlock
+model Achievement {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  description String
+  icon        String   // Icon name (trophy, star, zap, award, target, rocket)
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// User achievements tracking
+model UserAchievement {
+  id            String      @id @default(uuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime    @default(now())
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([userId, achievementId])
+}
+
+// Benefits for "Why Learn Git" section
+model Benefit {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  icon        String   // Lucide icon name
+  color       String   // Tailwind color class
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Target audiences for "Who Is This For" section
+model Audience {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  emoji       String
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Playground features list
+model PlaygroundFeature {
+  id          String   @id @default(uuid())
+  text        String
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Cheat sheet command sections (replacing hardcoded gitDocs.ts)
+model CheatSheetSection {
+  id          String              @id @default(uuid())
+  slug        String              @unique
+  title       String
+  order       Int                 @default(0)
+  isActive    Boolean             @default(true)
+  commands    CheatSheetCommand[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+model CheatSheetCommand {
+  id          String            @id @default(uuid())
+  command     String
+  syntax      String
+  description String
+  example     String
+  notes       String?
+  difficulty  Difficulty?
+  sectionId   String
+  section     CheatSheetSection @relation(fields: [sectionId], references: [id])
+  order       Int               @default(0)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+enum Difficulty {
+  beginner
+  intermediate
+  advanced
 }

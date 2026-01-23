@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search,
@@ -12,12 +12,19 @@ import {
   AlertCircle,
   Info,
   GitBranch,
+  Loader2,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import gitDocs from './gitDocs'
+import {
+  useCheatSheet,
+  CheatSheetSection as CheatSheetSectionType,
+  CheatSheetCommand,
+} from '@/hooks/Content/useContent'
+import gitDocs from './gitDocs' // Fallback data
+import { COLORS } from '@/constants'
 
-interface CommandBlock {
+interface LocalCommandBlock {
   command: string
   syntax: string
   description: string
@@ -26,28 +33,58 @@ interface CommandBlock {
   difficulty?: 'beginner' | 'intermediate' | 'advanced'
 }
 
+interface LocalSection {
+  id: string
+  title: string
+  commands: LocalCommandBlock[]
+}
+
 export const CheatSheet = () => {
-  const [selectedSection, setSelectedSection] = useState(gitDocs[0].id)
+  const router = useRouter()
+  const { data: apiSections, isLoading, isError } = useCheatSheet()
+
+  // Convert API data to local format or use fallback
+  const sections: LocalSection[] = useMemo(() => {
+    if (apiSections && apiSections.length > 0) {
+      return apiSections.map((section) => ({
+        id: section.slug,
+        title: section.title,
+        commands: section.commands.map((cmd) => ({
+          command: cmd.command,
+          syntax: cmd.syntax,
+          description: cmd.description,
+          example: cmd.example,
+          notes: cmd.notes,
+          difficulty: cmd.difficulty,
+        })),
+      }))
+    }
+    return gitDocs
+  }, [apiSections])
+
+  const [selectedSection, setSelectedSection] = useState(sections[0]?.id || 'basics')
   const [searchQuery, setSearchQuery] = useState('')
   const [difficultyFilter, setDifficultyFilter] = useState<string | null>(null)
   const [copiedCommand, setCopiedCommand] = useState<string | null>(null)
-  const router = useRouter()
 
   const onLearningPath = () => {
     router.push('/learning-path')
   }
 
   const currentSection =
-    gitDocs.find((s) => s.id === selectedSection) || gitDocs[0]
+    sections.find((s) => s.id === selectedSection) || sections[0]
 
-  const filteredCommands = currentSection.commands.filter((cmd) => {
-    const matchesSearch =
-      cmd.command.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      cmd.description.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesDifficulty =
-      !difficultyFilter || cmd.difficulty === difficultyFilter
-    return matchesSearch && matchesDifficulty
-  })
+  const filteredCommands = useMemo(() => {
+    if (!currentSection) return []
+    return currentSection.commands.filter((cmd) => {
+      const matchesSearch =
+        cmd.command.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        cmd.description.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesDifficulty =
+        !difficultyFilter || cmd.difficulty === difficultyFilter
+      return matchesSearch && matchesDifficulty
+    })
+  }, [currentSection, searchQuery, difficultyFilter])
 
   const handleCopy = (text: string, commandName: string) => {
     navigator.clipboard.writeText(text)
@@ -56,10 +93,20 @@ export const CheatSheet = () => {
     setTimeout(() => setCopiedCommand(null), 2000)
   }
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-emerald-400" />
+          <p className="text-slate-400">Loading cheat sheet...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col">
       {/* Header */}
-
       <div
         className="flex items-center justify-center gap-4 p-4 cursor-pointer"
         onClick={() => router.push('/')}
@@ -147,7 +194,7 @@ export const CheatSheet = () => {
             Sections
           </h2>
           <div className="space-y-1">
-            {gitDocs.map((section) => (
+            {sections.map((section) => (
               <button
                 key={section.id}
                 onClick={() => setSelectedSection(section.id)}
@@ -175,7 +222,7 @@ export const CheatSheet = () => {
             transition={{ duration: 0.3 }}
           >
             <h2 className="text-3xl font-bold text-white mb-6">
-              {currentSection.title}
+              {currentSection?.title}
             </h2>
 
             <div className="space-y-6">
@@ -212,7 +259,7 @@ function FilterButton({
   label: string
   color?: string
 }) {
-
+  const colorStyles = COLORS.difficulty
 
   return (
     <button
@@ -220,11 +267,11 @@ function FilterButton({
       className={`px-4 py-2 rounded-lg border transition-all ${
         active
           ? color === 'green'
-            ? 'bg-green-500/20 border-green-500/50 text-green-400'
+            ? `${colorStyles.beginner.bg} ${colorStyles.beginner.border} ${colorStyles.beginner.text}`
             : color === 'yellow'
-            ? 'bg-yellow-500/20 border-yellow-500/50 text-yellow-400'
+            ? `${colorStyles.intermediate.bg} ${colorStyles.intermediate.border} ${colorStyles.intermediate.text}`
             : color === 'red'
-            ? 'bg-red-500/20 border-red-500/50 text-red-400'
+            ? `${colorStyles.advanced.bg} ${colorStyles.advanced.border} ${colorStyles.advanced.text}`
             : 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400'
           : 'border-slate-700 text-slate-400 hover:bg-slate-800'
       }`}
@@ -239,15 +286,11 @@ function CommandCard({
   onCopy,
   isCopied,
 }: {
-  command: CommandBlock
+  command: LocalCommandBlock
   onCopy: (text: string, name: string) => void
   isCopied: boolean
 }) {
-  const difficultyColors = {
-    beginner: 'text-green-400 bg-green-400/10 border-green-400/30',
-    intermediate: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/30',
-    advanced: 'text-red-400 bg-red-400/10 border-red-400/30',
-  }
+  const difficultyColors = COLORS.difficulty
 
   return (
     <motion.div
@@ -266,7 +309,9 @@ function CommandCard({
             {command.difficulty && (
               <span
                 className={`px-2 py-1 rounded text-xs font-medium border ${
-                  difficultyColors[command.difficulty]
+                  difficultyColors[command.difficulty].bg
+                } ${difficultyColors[command.difficulty].border} ${
+                  difficultyColors[command.difficulty].text
                 }`}
               >
                 {command.difficulty}
@@ -328,8 +373,7 @@ function CommandCard({
       {/* Notes */}
       {command.notes && (
         <div className="flex items-start gap-2 p-3 bg-slate-800/50 border border-slate-700 rounded-lg">
-          {command.notes.includes('⚠️') ||
-          command.notes.includes('DANGEROUS') ? (
+          {command.notes.includes('DANGEROUS') ? (
             <AlertCircle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
           ) : (
             <Info className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />

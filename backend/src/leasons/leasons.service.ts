@@ -20,6 +20,7 @@ export interface LessonWithProgress {
   completionPattern?: string;
   practiceTask?: string | null;
   isFoundation?: boolean;
+  isPaid: boolean;
   createdAt: Date;
   updatedAt: Date;
   completed: boolean;
@@ -75,15 +76,22 @@ export class LeasonsService {
       return [];
     }
 
-    // Get user's level if not provided
+    // Get user's level and subscription status
     let currentUserLevelSlug = userLevelSlug;
+    let isUserSubscribed = false;
+    
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { 
+        level: { select: { slug: true } },
+        subscribed: true,
+      },
+    });
+    
     if (!currentUserLevelSlug) {
-      const user = await this.prisma.user.findUnique({
-        where: { id: userId },
-        select: { level: { select: { slug: true } } },
-      });
       currentUserLevelSlug = user?.level?.slug || 'newbie';
     }
+    isUserSubscribed = user?.subscribed || false;
 
     const userProgress = await this.prisma.userLeasonProgress.findMany({
       where: {
@@ -134,10 +142,11 @@ export class LeasonsService {
         completionPattern: completionPatterns[lesson.slug] || undefined,
         practiceTask: lesson.practiceTask,
         isFoundation: lesson.isFoundation,
+        isPaid: lesson.isPaid,
         createdAt: lesson.createdAt,
         updatedAt: lesson.updatedAt,
         completed: isCompleted,
-        locked: !this.isLessonUnlocked(lesson.id, lessons, progressMap, currentUserLevelSlug),
+        locked: !this.isLessonUnlocked(lesson.id, lessons, progressMap, currentUserLevelSlug, isUserSubscribed),
       };
     });
 
@@ -149,9 +158,15 @@ export class LeasonsService {
     lessons: any[],
     progressMap: Map<string, boolean>,
     userLevelSlug: string,
+    isUserSubscribed: boolean,
   ): boolean {
     const lesson = lessons.find((l) => l.id === lessonId);
     if (!lesson) {
+      return false;
+    }
+
+    // PREMIUM CHECK: If lesson is paid and user is not subscribed, lock it
+    if (lesson.isPaid && !isUserSubscribed) {
       return false;
     }
 
@@ -161,6 +176,12 @@ export class LeasonsService {
     const levelOrder = ['newbie', 'beginner', 'mid', 'pro'];
     const lessonLevelIndex = levelOrder.indexOf(lessonLevelSlug);
     const userLevelIndex = levelOrder.indexOf(userLevelSlug);
+
+    // LESSONS IN HIGHER LEVELS (above user's current level) ARE LOCKED
+    // User must complete current level before accessing next level
+    if (lessonLevelIndex > userLevelIndex) {
+      return false;
+    }
 
     // LESSONS IN COMPLETED LEVELS (lower than user's current level) ARE UNLOCKED
     // Users should have access to lessons they've already completed for review
@@ -183,7 +204,7 @@ export class LeasonsService {
       return progressMap.get(lessonId) === true;
     }
 
-    // LESSONS IN USER'S CURRENT LEVEL
+    // LESSONS IN USER'S CURRENT LEVEL (lessonLevelIndex === userLevelIndex)
     const levelLessons = lessons
       .filter((l) => l.level?.slug === lessonLevelSlug)
       .sort((a, b) => {

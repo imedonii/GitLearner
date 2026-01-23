@@ -10,6 +10,7 @@ import { LevelsModule } from './levels/levels.module';
 import { UserLessonProgressModule } from './user-lesson-progress/user-lesson-progress.module';
 import { MailModule } from './mail/mail.module';
 import { HelpAndTipsModule } from './help-and-tips/help-and-tips.module';
+import { ContentModule } from './content/content.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { HelpAndTipsModule } from './help-and-tips/help-and-tips.module';
     UserLessonProgressModule,
     MailModule,
     HelpAndTipsModule,
+    ContentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
