@@ -416,9 +416,9 @@ export const LearningPath = () => {
           subscribed={user?.subscribed ?? false}
         />
 
-        {/* Main Content Area - with margin for fixed sidebar, entire page scrollable */}
-        <div className="flex-1 ml-80 overflow-y-auto">
-          <div className="min-h-screen flex flex-col">
+        {/* Main Content Area - with margin for fixed sidebar */}
+        <div className="ml-80 h-[calc(100vh-5rem)] overflow-y-auto">
+          <div className="flex flex-col">
             {/* Lesson Panel */}
             <div className="p-4 border-b border-slate-700 bg-slate-900">
               <LessonPanel
@@ -433,13 +433,13 @@ export const LearningPath = () => {
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 p-4 max-h-[80vh]">
+            <div className="flex-1 p-4">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Left: Terminal */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="flex flex-col h-[80vh]"
+                  className="h-[80vh]"
                 >
                   <Terminal
                     onCommand={handleCommand}
