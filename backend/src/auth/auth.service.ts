@@ -60,7 +60,7 @@ export class AuthService {
       verificationCode,
     });
 
-    return this.signToken(user.id, user.email);
+    return this.signToken(user.id, user.email, user.role);
   }
 
   async signin(dto: SigninDto) {
@@ -74,7 +74,7 @@ export class AuthService {
 
     if (!passwordMatch) throw new UnauthorizedException('Invalid credentials');
 
-    return this.signToken(user.id, user.email);
+    return this.signToken(user.id, user.email, user.role);
   }
 
   async verifyEmail(email: string, code: string) {
@@ -262,6 +262,7 @@ export class AuthService {
         levelId: updatedUser.levelId,
         level: updatedUser.level,
         subscribed: updatedUser.subscribed,
+        role: updatedUser.role,
       },
     };
   }
@@ -327,6 +328,7 @@ export class AuthService {
         email: user.email,
         level: user.level,
         subscribed: user.subscribed,
+        role: user.role,
       },
       progress: {
         completedLessons: completedLessons.length,
@@ -351,8 +353,8 @@ export class AuthService {
     };
   }
 
-  private async signToken(userId: string, email: string) {
-    const payload = { sub: userId, email };
+  private async signToken(userId: string, email: string, role: string) {
+    const payload = { sub: userId, email, role };
 
     return {
       token: await this.jwt.signAsync(payload, {
