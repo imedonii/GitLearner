@@ -145,6 +145,7 @@ export const LearningPath = () => {
         })
         .then(() => {
           queryClient.invalidateQueries({ queryKey: [QUERY_KEY.user] })
+          queryClient.invalidateQueries({ queryKey: [QUERY_KEY.lessons] })
           addNotification({
             type: 'success',
             title: 'Level Up!',
@@ -152,10 +153,10 @@ export const LearningPath = () => {
               nextLevelSlug === 'beginner'
                 ? 'Beginner'
                 : nextLevelSlug === 'mid'
-                ? 'I Know Things'
-                : nextLevelSlug === 'pro'
-                ? 'Pro'
-                : 'Newbie'
+                  ? 'I Know Things'
+                  : nextLevelSlug === 'pro'
+                    ? 'Pro'
+                    : 'Newbie'
             } level.`,
           })
         })
@@ -433,96 +434,100 @@ export const LearningPath = () => {
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 p-4">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Left: Terminal */}
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="h-[80vh]"
-                >
-                  <Terminal
-                    onCommand={handleCommand}
-                    currentPath={gitState.initialized ? '~/my-project' : '~'}
-                  />
-                </motion.div>
+            {currentLesson?.levelSlug === 'newbie' ? (
+              <></>
+            ) : (
+              <div className="flex-1 p-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {/* Left: Terminal */}
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="h-[80vh]"
+                  >
+                    <Terminal
+                      onCommand={handleCommand}
+                      currentPath={gitState.initialized ? '~/my-project' : '~'}
+                    />
+                  </motion.div>
 
-                {/* Right: Visualization */}
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="flex flex-col gap-4"
-                >
-                  {showTwoComputer ? (
-                    <div className="bg-slate-900 rounded-lg border border-slate-700 p-4">
-                      <h2 className="text-lg font-bold mb-4 text-emerald-400">
-                        Remote Collaboration
-                      </h2>
-                      <TwoComputerSimulation
-                        localCommits={gitState.commits}
-                        remoteCommits={
-                          gitState.remotePushed ? gitState.commits : []
-                        }
-                        collaboratorCommits={[]}
-                        showPushAnimation={showPushAnimation}
-                        showPullAnimation={showPullAnimation}
-                      />
-                    </div>
-                  ) : (
-                    <div className="bg-slate-900 rounded-lg border border-slate-700 p-4">
-                      <h2 className="text-lg font-bold mb-4 text-emerald-400">
-                        Git Flow Visualization
-                      </h2>
-                      <GitFlowDiagram
-                        workingFiles={gitState.workingDirectory}
-                        stagedFiles={gitState.stagingArea}
-                        committedFiles={
-                          gitState.commits.length > 0
-                            ? [
-                                {
-                                  id: 'commits',
-                                  name: `${gitState.commits.length} commit(s)`,
-                                },
-                              ]
-                            : []
-                        }
-                        remotePushed={gitState.remotePushed}
-                        showRemote={false}
-                      />
-                    </div>
-                  )}
+                  {/* Right: Visualization */}
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="flex flex-col gap-4"
+                  >
+                    {showTwoComputer ? (
+                      <div className="bg-slate-900 rounded-lg border border-slate-700 p-4">
+                        <h2 className="text-lg font-bold mb-4 text-emerald-400">
+                          Remote Collaboration
+                        </h2>
+                        <TwoComputerSimulation
+                          localCommits={gitState.commits}
+                          remoteCommits={
+                            gitState.remotePushed ? gitState.commits : []
+                          }
+                          collaboratorCommits={[]}
+                          showPushAnimation={showPushAnimation}
+                          showPullAnimation={showPullAnimation}
+                        />
+                      </div>
+                    ) : (
+                      <div className="bg-slate-900 rounded-lg border border-slate-700 p-4">
+                        <h2 className="text-lg font-bold mb-4 text-emerald-400">
+                          Git Flow Visualization
+                        </h2>
+                        <GitFlowDiagram
+                          workingFiles={gitState.workingDirectory}
+                          stagedFiles={gitState.stagingArea}
+                          committedFiles={
+                            gitState.commits.length > 0
+                              ? [
+                                  {
+                                    id: 'commits',
+                                    name: `${gitState.commits.length} commit(s)`,
+                                  },
+                                ]
+                              : []
+                          }
+                          remotePushed={gitState.remotePushed}
+                          showRemote={false}
+                        />
+                      </div>
+                    )}
 
-                  {/* Quick Stats */}
-                  <div className="bg-slate-900 rounded-lg border border-slate-700 p-4">
-                    <h3 className="text-sm font-semibold text-slate-400 mb-3">
-                      Repository Status
-                    </h3>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <StatBox
-                        label="Branch"
-                        value={gitState.currentBranch}
-                        color="blue"
-                      />
-                      <StatBox
-                        label="Commits"
-                        value={gitState.commits.length.toString()}
-                        color="emerald"
-                      />
-                      <StatBox
-                        label="Staged"
-                        value={gitState.stagingArea.length.toString()}
-                        color="purple"
-                      />
-                      <StatBox
-                        label="Modified"
-                        value={gitState.workingDirectory.length.toString()}
-                        color="orange"
-                      />
+                    {/* Quick Stats */}
+                    <div className="bg-slate-900 rounded-lg border border-slate-700 p-4">
+                      <h3 className="text-sm font-semibold text-slate-400 mb-3">
+                        Repository Status
+                      </h3>
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <StatBox
+                          label="Branch"
+                          value={gitState.currentBranch}
+                          color="blue"
+                        />
+                        <StatBox
+                          label="Commits"
+                          value={gitState.commits.length.toString()}
+                          color="emerald"
+                        />
+                        <StatBox
+                          label="Staged"
+                          value={gitState.stagingArea.length.toString()}
+                          color="purple"
+                        />
+                        <StatBox
+                          label="Modified"
+                          value={gitState.workingDirectory.length.toString()}
+                          color="orange"
+                        />
+                      </div>
                     </div>
-                  </div>
-                </motion.div>
+                  </motion.div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

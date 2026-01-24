@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/UI'
 import AppTooltip from '@/components/UI/AppTooltip'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useLevelsWithStyling, LevelWithStyling } from '@/hooks/Content/useContent'
 import { levelSlugToKey } from '@/hooks/Auth/useUser'
 
@@ -176,6 +176,17 @@ export default function Sidebar({
   const [expandedLevels, setExpandedLevels] = useState<Set<string>>(
     new Set(userLevel ? [userLevel] : [])
   )
+
+  // Expand the user's current level when it changes (e.g., after a level up)
+  useEffect(() => {
+    if (userLevel) {
+      setExpandedLevels((prev) => {
+        const newSet = new Set(prev)
+        newSet.add(userLevel)
+        return newSet
+      })
+    }
+  }, [userLevel])
   const [premiumTooltip, setPremiumTooltip] = useState<string | null>(null)
   const [lessonTooltip, setLessonTooltip] = useState<string | null>(null)
 
